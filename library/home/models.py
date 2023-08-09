@@ -15,30 +15,25 @@ class User(AbstractUser):
     )
     gender = models.CharField(max_length=1, choices=gender_choices, blank=True, null=True)
 
-    groups = models.ManyToManyField(
-        'auth.Group',
-        related_name='custom_user_set',
-        blank=True,
-        help_text='The groups this user belongs to.',
-        verbose_name='groups'
+    role_choices = (
+        ('A', 'Admin'),
+        ('L', 'Librarian'),
+        ('C', 'Customer'),
     )
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        related_name='custom_user_set',
-        blank=True,
-        help_text='Specific permissions for this user.',
-        verbose_name='user permissions'
-    )
+    role = models.CharField(max_length=1, choices=role_choices, null=False, default='C')
+
+    REQUIRED_FIELDS = []
+
 
     def __str__(self):
         return self.username
 
 class Book(models.Model):
-    # name, image, author name, publisher and number of books
     name = models.CharField(max_length=50)
     author_name = models.CharField(max_length=50)
     publisher_name = models.CharField(max_length=50)
     number_of_books = models.PositiveIntegerField()
+    
     #To-Do : Add the image field  
 
     def __str__(self):

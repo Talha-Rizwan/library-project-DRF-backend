@@ -1,3 +1,5 @@
+from django.db.models import Q
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -83,3 +85,12 @@ def book_detail(request, pk, format=None):
         book.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+@api_view(['GET'])
+def get_book_by_name_or_author(request, name, format=None):
+    try:
+        books = Book.objects.filter(Q(name__icontains=name) | Q(author_name__icontains=name))
+        serializer = BookSerializer(books, many=True)
+        return Response(serializer.data)
+    except Book.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    

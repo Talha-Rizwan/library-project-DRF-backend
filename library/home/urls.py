@@ -1,11 +1,12 @@
 from django.urls import path
-from .views import homePage, book_list, book_detail
+from home import views
 from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
-    path('', homePage, name='home'),
-    path('book-list',book_list, name='book-list' ),
-    path('book-detail/<int:pk>/',book_detail, name='book-detail' )
+    path('', views.homePage, name='home'),
+    path('book-list',views.book_list, name='book-list' ),
+    path('book-detail/<int:pk>/',views.book_detail, name='book-detail' ),
+    path('book-detail-name/<str:name>', views.get_book_by_name_or_author, name='book-detail-name')
 
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)

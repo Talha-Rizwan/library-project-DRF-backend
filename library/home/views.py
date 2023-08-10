@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
-from .serializers import BookSerializer, UserSerializer
+from .serializers import BookSerializer, UserSerializer, UserLoginSerializer
 from .models import Book
 
 @api_view(['GET'])
@@ -133,3 +133,30 @@ class RegisterView(APIView):
                 'data': {},
                 'message': 'something went wrong'
             }, status=status.HTTP_400_BAD_REQUEST)
+        
+class LoginView(APIView):
+
+    def post(self, request):
+        try:
+            data = request.data
+            serializer = UserLoginSerializer(data=data)
+
+            if not serializer.is_valid():
+                return Response({
+                    'data': {},
+                    'message': 'something went wrong'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            response = serializer.get_jwt_token(serializer.data)
+
+            return Response(response, status=status.HTTP_200_OK)  
+
+        
+        except Exception as e:
+            print(e)
+            return Response({
+                'data': {},
+                'message': 'something went wrong'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+

@@ -8,7 +8,9 @@ urlpatterns = [
     path('book-detail-name/<str:name>/', views.get_book_by_name_or_author, name='book-detail-name'),
     path('register/', views.RegisterView.as_view(), name='register'),
     path('login/', views.LoginView.as_view(), name='login'),
-    path('update-profile/', views.UpdateUser.as_view(), name='update-profile')
+    path('update-profile/', views.UpdateUser.as_view(), name='update-profile'),
+    path('pending-request/', views.BookRequestView.as_view(), name='pending-request'),
+    path('all-request/', views.LibrarianBookRequestView.as_view(), name='all-request'),
 
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)

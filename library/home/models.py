@@ -14,19 +14,15 @@ class User(AbstractUser):
         ('O', 'Other'),
     )
     gender = models.CharField(max_length=1, choices=gender_choices, blank=True, null=True)
-
     role_choices = (
         ('A', 'Admin'),
         ('L', 'Librarian'),
         ('C', 'Customer'),
     )
     role = models.CharField(max_length=1, choices=role_choices, null=False, default='C')
-    issued_books = models.ManyToManyField('Book', blank=True)
-
-
+    # issued_books = models.ManyToManyField('Book', blank=True)
 
     REQUIRED_FIELDS = []
-
 
     def __str__(self):
         return self.username
@@ -41,3 +37,18 @@ class Book(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class PendingRequest(models.Model):
+    request_user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
+    requested_book = models.ForeignKey(Book, on_delete=models.CASCADE, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    status_choices = (
+        ('P', 'Pending'),
+        ('A', 'Approved'),
+        ('R', 'Rejected'),
+    )
+    status = models.CharField(max_length=1, choices=status_choices, null=False, default='P')
+
+    def __str__(self):
+        return f'Request from {self.request_user.full_name} for {self.requested_book.name} - {self.status}'

@@ -2,12 +2,14 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 
-from .models import Book, User
+from .models import Book, User, PendingRequest
 
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
         fields = '__all__'
+
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,3 +35,12 @@ class UserLoginSerializer(serializers.Serializer):
         refresh = RefreshToken.for_user(user)
         return {'message': 'login success', 'data': {'token': {'refresh': str(refresh),'access': str(refresh.access_token)}}}
  
+class PendingRequestSerializer(serializers.ModelSerializer):
+    # request_user = UserSerializer()
+    # requested_book = BookSerializer()
+    
+    class Meta:
+        model = PendingRequest
+        fields = '__all__'
+        # depth = 1
+

@@ -104,6 +104,7 @@ def get_book_by_name_or_author(request, name, format=None):
 
 
 class RegisterView(APIView):
+    '''to register as a new user'''
 
     def post(self, request):
         try:
@@ -135,8 +136,43 @@ class RegisterView(APIView):
                 'data': {},
                 'message': 'something went wrong'
             }, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class UpdateUser(APIView):
+    '''To update the user profile info'''
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def put(self, request):
+        try:
+            user = request.user
+            data = request.data
+
+            data.pop('username', None)
+            data.pop('password', None)
+
+            serializer = UserSerializer(user, data=data, partial=True)
+
+            if not serializer.is_valid():
+                return Response({
+                    'data': serializer.errors,
+                    'message': 'Validation failed'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            serializer.save()
+
+            return Response({
+                'data': {},
+                'message': 'Your profile has been updated'
+            }, status=status.HTTP_200_OK)
         
-        # TO-DO user update profile
+        except Exception as e:
+            print(e)
+            return Response({
+                'data': {},
+                'message': 'Something went wrong'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class LoginView(APIView):

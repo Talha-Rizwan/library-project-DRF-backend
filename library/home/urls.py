@@ -8,6 +8,7 @@ urlpatterns = [
     path('book-detail-name/<str:name>/', views.get_book_by_name_or_author, name='book-detail-name'),
     path('register/', views.RegisterView.as_view(), name='register'),
     path('login/', views.LoginView.as_view(), name='login'),
+    path('update-profile/', views.UpdateUser.as_view(), name='update-profile')
 
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)

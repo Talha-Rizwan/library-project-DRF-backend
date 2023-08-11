@@ -21,6 +21,9 @@ class User(AbstractUser):
         ('C', 'Customer'),
     )
     role = models.CharField(max_length=1, choices=role_choices, null=False, default='C')
+    issued_books = models.ManyToManyField('Book', blank=True)
+
+
 
     REQUIRED_FIELDS = []
 

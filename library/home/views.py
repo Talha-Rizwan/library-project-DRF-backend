@@ -1,27 +1,24 @@
 from django.db.models import Q
 from django.contrib.auth.hashers import make_password
+from django.http import Http404
 
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .serializers import BookSerializer, UserSerializer, UserLoginSerializer
 from .models import Book
+from .permissions import AdminAuthenticatedOrReadOnly
 
-@api_view(['GET'])
-def homePage(request):
-    print(request.user)
-    return Response({
-        'status': 200,
-        'message': 'Yes! it is working now'
-    })
 
-@api_view(['GET', 'POST'])
-def book_list(request, format=None):
+class book_list(APIView):
     '''To Create a new book or Get all the books'''
-
-    if request.method == 'GET':
+    permission_classes = [AdminAuthenticatedOrReadOnly]
+    authentication_classes = [JWTAuthentication]
+    def get(self, request):
         try:
             data = Book.objects.all()
             serializer = BookSerializer(data, many=True)
@@ -38,8 +35,7 @@ def book_list(request, format=None):
                 'message': 'something went wrong!'
             })
 
-
-    if request.method == 'POST':
+    def post(self, request):
         try:
             data = request.data
             serializer = BookSerializer(data=data)
@@ -66,26 +62,32 @@ def book_list(request, format=None):
             })
     
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def book_detail(request, pk, format=None):
+class book_detail(APIView):
     '''To perform Get, Update and Delete operations on a single book by passing id.'''
-    try:
-        book = Book.objects.get(pk=pk)
-    except Book.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+    permission_classes = [AdminAuthenticatedOrReadOnly]
+    authentication_classes = [JWTAuthentication]
     
-    if request.method == 'GET':
+    def get_object(self, pk):
+        try:
+            return Book.objects.get(pk=pk)
+        except Book.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, pk, format=None):
+        book = self.get_object(pk)
         serializer = BookSerializer(book)
         return Response (serializer.data)
     
-    elif request.method == 'PUT':
+    def put(self, request, pk, format=None):
+        book = self.get_object(pk)
         serializer = BookSerializer(book, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    elif request.method == 'DELETE':
+    def delete(self, request, pk, format=None):
+        book = self.get_object(pk)
         book.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -134,6 +136,9 @@ class RegisterView(APIView):
                 'message': 'something went wrong'
             }, status=status.HTTP_400_BAD_REQUEST)
         
+        # TO-DO user update profile
+
+
 class LoginView(APIView):
 
     def post(self, request):

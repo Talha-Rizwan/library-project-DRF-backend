@@ -11,7 +11,9 @@ urlpatterns = [
     path('update-profile/', views.UpdateUser.as_view(), name='update-profile'),
     path('pending-request/', views.CreateBookRequestView.as_view(), name='pending-request'),
     path('all-request/', views.ListBookRequestView.as_view(), name='all-request'),
-    path('request/<int:pk>/', views.DetailBookRequestView.as_view(), name='all-request'),
+    path('request/<int:pk>/', views.DetailBookRequestView.as_view(), name='request'),
+    path('return-request/<int:pk>/', views.ReturnBookView.as_view(), name='return-request'),
+    path('close-request/<int:pk>/', views.CloseBookRequest.as_view(), name='close-request')
 
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)

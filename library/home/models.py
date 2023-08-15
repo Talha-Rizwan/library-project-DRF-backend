@@ -20,7 +20,8 @@ class User(AbstractUser):
         ('C', 'Customer'),
     )
     role = models.CharField(max_length=1, choices=role_choices, null=False, default='C')
-    # issued_books = models.ManyToManyField('Book', blank=True)
+    issued_books = models.ManyToManyField('Book', blank=True, related_name='users')
+
 
     REQUIRED_FIELDS = []
 
@@ -47,6 +48,8 @@ class PendingRequest(models.Model):
         ('P', 'Pending'),
         ('A', 'Approved'),
         ('R', 'Rejected'),
+        ('B', 'Back Return'),
+        ('C', 'Closed')
     )
     status = models.CharField(max_length=1, choices=status_choices, null=False, default='P')
 

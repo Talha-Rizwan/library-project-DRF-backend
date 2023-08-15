@@ -1,6 +1,8 @@
 from django.urls import path
-from home import views
+
 from rest_framework.urlpatterns import format_suffix_patterns
+
+from home import views
 
 urlpatterns = [
     path('book-list/',views.book_list.as_view(), name='book-list' ),

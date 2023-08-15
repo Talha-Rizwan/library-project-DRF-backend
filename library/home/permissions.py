@@ -12,7 +12,6 @@ class LibrarianAuthenticatedOrReadOnly(BasePermission):
 
 class IsLibrarianAuthenticated(BasePermission):
     """Custom permission to allow only admin or librarian for CRUD."""
-
     def has_permission(self, request, view): 
         return request.user and request.user.is_authenticated and (request.user.role == 'A' or request.user.role == 'L')
 

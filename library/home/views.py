@@ -202,13 +202,45 @@ def get_book_by_name_or_author(request, name, format=None):
 
 
 
-class CreateBookRequestView(APIView):
+class UserBookRequestView(APIView):
 
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
+    def get(self, request):
+        try:
+            data = PendingRequest.objects.filter(request_user = request.user)
+            serializer = PendingRequestSerializer(data, many=True)
+            issued_books = request.user.issued_books.all()
+            print(issued_books)
+            books_issued = []
+            for book in issued_books:
+                books_issued.append(book.name)
+            requested_books = PendingRequest.objects.filter(Q(request_user = request.user) & Q(status='P'))
+            books_requested = []
+            for book in requested_books:
+                books_requested.append(book.requested_book.name)
+            
+            returned_books = PendingRequest.objects.filter(Q(request_user = request.user) & (Q(status='C') | Q(status='B')))
+            books_returned = []
+            for book in returned_books:
+                books_returned.append(book.requested_book.name)
+            print('returned books are : ', books_returned)
+            return Response({
+                    'status': True,
+                    'message': 'success data',
+                    'data': {'books': {"issued books": books_issued, "requested books": books_requested, "returned books" : books_returned}}
+            }, status= status.HTTP_200_OK)
+            
+        except Exception as e:
+            print(e)
+            return Response({
+                'status': False,
+                'message': 'something went wrong!'
+            })
+
     def post(self, request, *args, **kwargs):
-        
+
         data = request.data
         data['status'] = 'P'
         data['request_user'] = request.user.id
@@ -333,6 +365,5 @@ class CloseBookRequest(APIView):
     
 
 
-# TO DO : user has an api to return the book (done)
 # TO DO : User should have a page for My Books from where they can view their Issued Books, Requested Books, Returned Books
 # TO DO : Librarians can be added by Admin

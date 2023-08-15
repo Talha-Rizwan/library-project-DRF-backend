@@ -13,7 +13,9 @@ urlpatterns = [
     path('all-request/', views.ListBookRequestView.as_view(), name='all-request'),
     path('request/<int:pk>/', views.DetailBookRequestView.as_view(), name='request'),
     path('return-request/<int:pk>/', views.ReturnBookView.as_view(), name='return-request'),
-    path('close-request/<int:pk>/', views.CloseBookRequest.as_view(), name='close-request')
+    path('close-request/<int:pk>/', views.CloseBookRequest.as_view(), name='close-request'),
+    path('user-role/<int:pk>/',views.LibrarianRoleDetailView.as_view(), name='user-role'),
+    path('users/', views.UserRoleListView.as_view(), name='users'),
 
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)

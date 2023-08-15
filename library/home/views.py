@@ -9,9 +9,9 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .serializers import BookSerializer, UserSerializer, UserLoginSerializer, PendingRequestSerializer, ReturnRequestSerializer
+from .serializers import BookSerializer, UserSerializer, UserLoginSerializer, PendingRequestSerializer, ReturnRequestSerializer, UserRoleSerializer
 from .models import Book, PendingRequest, User
-from .permissions import LibrarianAuthenticatedOrReadOnly, IsLibrarianAuthenticated
+from .permissions import LibrarianAuthenticatedOrReadOnly, IsLibrarianAuthenticated, IsAdminAuthenticated
 
 
 
@@ -362,8 +362,50 @@ class CloseBookRequest(APIView):
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response({"message": "user has not opened a closed request"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+class UserRoleListView(APIView):
+    permission_classes = [IsLibrarianAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def get(self, request):
+        try:
+            data = User.objects.all()
+            serializer = UserRoleSerializer(data, many=True)
+            return Response({
+                    'status': True,
+                    'message': 'success data',
+                    'data': serializer.data
+            }, status= status.HTTP_200_OK)
+            
+        except Exception as e:
+            print(e)
+            return Response({
+                'status': False,
+                'message': 'something went wrong!'
+            })
+
+
+class LibrarianRoleDetailView(APIView):
+    permission_classes = [IsAdminAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def get_object(self, pk):
+        try:
+            return User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, pk, format=None):
+        user = self.get_object(pk)
+        serializer = UserRoleSerializer(user)
+        return Response (serializer.data)
     
 
-
-# TO DO : User should have a page for My Books from where they can view their Issued Books, Requested Books, Returned Books
-# TO DO : Librarians can be added by Admin
+    def put(self, request, pk, format=None):
+        user = self.get_object(pk)
+        serializer = UserRoleSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    

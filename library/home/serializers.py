@@ -34,7 +34,13 @@ class UserLoginSerializer(serializers.Serializer):
         
         refresh = RefreshToken.for_user(user)
         return {'message': 'login success', 'data': {'token': {'refresh': str(refresh),'access': str(refresh.access_token)}}}
- 
+
+class UserRoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'role']
+
+
 class PendingRequestSerializer(serializers.ModelSerializer):
     # request_user = UserSerializer()
     # requested_book = BookSerializer()

@@ -11,7 +11,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .serializers import BookSerializer, UserSerializer, UserLoginSerializer, PendingRequestSerializer
 from .models import Book, PendingRequest, User
-from .permissions import AdminAuthenticatedOrReadOnly
+from .permissions import LibrarianAuthenticatedOrReadOnly, IsLibrarianAuthenticated
 
 
 
@@ -114,7 +114,7 @@ class LoginView(APIView):
 
 class book_list(APIView):
     '''To Create a new book or Get all the books'''
-    permission_classes = [AdminAuthenticatedOrReadOnly]
+    permission_classes = [LibrarianAuthenticatedOrReadOnly]
     authentication_classes = [JWTAuthentication]
     def get(self, request):
         try:
@@ -162,7 +162,7 @@ class book_list(APIView):
 
 class book_detail(APIView):
     '''To perform Get, Update and Delete operations on a single book by passing id.'''
-    permission_classes = [AdminAuthenticatedOrReadOnly]
+    permission_classes = [LibrarianAuthenticatedOrReadOnly]
     authentication_classes = [JWTAuthentication]
     
     def get_object(self, pk):
@@ -203,13 +203,19 @@ def get_book_by_name_or_author(request, name, format=None):
 
 
 
-class BookRequestView(APIView):
-    
-    
+class CreateBookRequestView(APIView):
+
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     def post(self, request, *args, **kwargs):
+
+        # TO DO: allow the pending request only if book copies are more than zero
+        # TO DO: when request is made, make the copeis = copies - 1
+        # TO DO : user cannot have more than 3 books at a time
+
+
+
         data = request.data
         data['request_user'] = request.user.id
         serializer = PendingRequestSerializer(data=data)
@@ -219,9 +225,8 @@ class BookRequestView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-class LibrarianBookRequestView(APIView):
-
-    permission_classes = [AdminAuthenticatedOrReadOnly]
+class ListBookRequestView(APIView):
+    permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
     
     def get(self, request):
@@ -240,3 +245,32 @@ class LibrarianBookRequestView(APIView):
                 'status': False,
                 'message': 'something went wrong!'
             })
+        
+class DetailBookRequestView(APIView):
+    permission_classes = [IsLibrarianAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def get_object(self, pk):
+        try:
+            return PendingRequest.objects.get(pk=pk)
+        except PendingRequest.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        req = self.get_object(pk)
+        serializer = PendingRequestSerializer(req)
+        return Response (serializer.data)
+    
+    def put(self, request, pk, format=None):
+        req = self.get_object(pk)
+        serializer = PendingRequestSerializer(req, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+ 
+
+# TO DO : user has an api to return the book
+# TO DO : User should have a page for My Books from where they can view their Issued Books, Requested Books, Returned Books
+# TO DO : Librarians can be added by Admin

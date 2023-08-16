@@ -2,7 +2,9 @@
 from django.db.models import Q
 from django.contrib.auth.hashers import make_password
 from django.http import Http404
+from django.db.utils import IntegrityError
 
+from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -22,7 +24,6 @@ class UserProfileView(APIView):
     permission_classes_post = []
     permission_classes_put = [IsAuthenticated]
     authentication_classes_put = [JWTAuthentication]
-
 
     def post(self, request):
         '''to register as a new user'''
@@ -45,6 +46,18 @@ class UserProfileView(APIView):
                 'data': {},
                 'message': 'your account is created'
             }, status=status.HTTP_201_CREATED)
+
+        except ValidationError as validation_error:
+            return Response({
+                'data': validation_error.detail,
+                'message': 'validation failed'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        except IntegrityError:
+            return Response({
+                'data': {},
+                'message': 'database integrity error'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as error:
             print(error)
@@ -75,6 +88,18 @@ class UserProfileView(APIView):
                 'message': 'Your profile has been updated'
             }, status=status.HTTP_200_OK)
 
+        except ValidationError as validation_error:
+            return Response({
+                'data': validation_error.detail,
+                'message': 'validation failed'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        except IntegrityError:
+            return Response({
+                'data': {},
+                'message': 'database integrity error'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         except Exception as error:
             print(error)
             return Response({
@@ -85,6 +110,7 @@ class UserProfileView(APIView):
 
 class LoginView(APIView):
     '''To make a user login (get jwt token)'''
+
     def post(self, request):
         '''post request with correct credintials will return a jwt token.'''
         try:
@@ -99,6 +125,18 @@ class LoginView(APIView):
             response = serializer.get_jwt_token(serializer.data)
 
             return Response(response, status=status.HTTP_200_OK)
+
+        except ValidationError as validation_error:
+            return Response({
+                'data': validation_error.detail,
+                'message': 'validation failed'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        except IntegrityError:
+            return Response({
+                'data': {},
+                'message': 'database integrity error'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as error:
             print(error)
@@ -123,6 +161,18 @@ class UserRoleListView(APIView):
                     'message': 'success data',
                     'data': serializer.data
             }, status= status.HTTP_200_OK)
+
+        except ValidationError as validation_error:
+            return Response({
+                'data': validation_error.detail,
+                'message': 'validation failed'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        except IntegrityError:
+            return Response({
+                'data': {},
+                'message': 'database integrity error'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as error:
             print(error)
@@ -187,8 +237,8 @@ class UserBookRequestView(APIView):
     def get(self, request):
         '''To get a user's issued books, pending request books and returned books.'''
         try:
-            data = PendingRequest.objects.filter(request_user = request.user)
-            serializer = RequestSerializer(data, many=True)
+            # data = PendingRequest.objects.filter(request_user = request.user)
+            # serializer = RequestSerializer(data, many=True)
             issued_books = request.user.issued_books.all()
             books_issued = []
 
@@ -230,7 +280,7 @@ class UserBookRequestView(APIView):
                 'message': 'something went wrong!'
             })
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         '''Authenticated user to create a new pending request.'''
         data = request.data
         data['status'] = 'P'
@@ -267,6 +317,7 @@ class ListBookRequestView(APIView):
 
 
 class DetailBookRequestView(APIView):
+    '''librarian view to get or update user request'''
     permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
 
@@ -305,11 +356,12 @@ class DetailBookRequestView(APIView):
 
 
 class ReturnBookView(APIView):
+    '''user view to initiate a return request.'''
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     def get_object(self, pk):
-        '''return requested request object if available'''
+        '''return specific request object if available'''
         try:
             return PendingRequest.objects.get(pk=pk)
         except PendingRequest.DoesNotExist:
@@ -338,6 +390,7 @@ class ReturnBookView(APIView):
 
 
 class CloseBookRequest(APIView):
+    '''Librarian view to close a return book request.'''
     permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
 

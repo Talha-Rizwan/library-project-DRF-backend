@@ -15,8 +15,14 @@ from .permissions import LibrarianAuthenticatedOrReadOnly, IsLibrarianAuthentica
 
 
 class RegisterView(APIView):
-    '''to register as a new user'''
+    
+    permission_classes_post = []
+    permission_classes_put = [IsAuthenticated]
+    authentication_classes_put = [JWTAuthentication]
+
+
     def post(self, request):
+        '''to register as a new user'''
         try:
             data = request.data
             password = data.get('password')  
@@ -43,14 +49,9 @@ class RegisterView(APIView):
                 'data': {},
                 'message': 'something went wrong'
             }, status=status.HTTP_400_BAD_REQUEST)
-
-
-class UpdateUser(APIView):
-    '''To update the user profile info'''
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
-
+        
     def put(self, request):
+        '''to update user profile info.'''
         try:
             user = request.user
             data = request.data
@@ -151,7 +152,7 @@ class LibrarianRoleDetailView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+# TO-DO convert this to view sets
 class book_list(APIView):
     '''To Create a new book or Get all the books'''
     permission_classes = [LibrarianAuthenticatedOrReadOnly]
@@ -229,6 +230,7 @@ class book_detail(APIView):
         book.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+##################
 
 @api_view(['GET'])
 def get_book_by_name_or_author(request, name, format=None):

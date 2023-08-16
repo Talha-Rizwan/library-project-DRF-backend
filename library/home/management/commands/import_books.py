@@ -1,9 +1,13 @@
 '''customize managment commands classes'''
 import csv
+
 from django.core.management.base import BaseCommand
+
 from home.models import Book
 
-# Command to run : python manage.py import_books /Users/talha.malik/Desktop/library_project/library_management_system/books_data.csv
+# Command to run :
+# python manage.py import_books
+# /Users/talha.malik/Desktop/library_project/library_management_system/books_data.csv
 
 class Command(BaseCommand):
     '''customize command to create new books from csv file'''
@@ -22,6 +26,11 @@ class Command(BaseCommand):
             next(reader)
 
             for row in reader:
-                book = Book.objects.create(name=row[0], author_name=row[1], publisher_name=row[2], number_of_books=int(row[3]))
+                book = Book.objects.create(
+                    name=row[0],
+                    author_name=row[1],
+                    publisher_name=row[2],
+                    number_of_books=int(row[3])
+                    )
 
-                self.stdout.write(self.style.SUCCESS(f'Successfully imported book: {book}'))
+                self.stdout.write(self.style.SUCCESS(f'Successfully imported book: {book}')) # pylint: disable=no-member

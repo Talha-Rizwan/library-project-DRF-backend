@@ -1,3 +1,4 @@
+'''views of all the home class requests on url api/'''
 from django.db.models import Q
 from django.contrib.auth.hashers import make_password
 from django.http import Http404
@@ -9,13 +10,15 @@ from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .serializers import BookSerializer, UserSerializer, UserLoginSerializer, PendingRequestSerializer, ReturnRequestSerializer, UserRoleSerializer
+from .serializers import BookSerializer, UserSerializer, UserLoginSerializer
+from .serializers import RequestSerializer, UserRoleSerializer
 from .models import Book, PendingRequest, User
-from .permissions import LibrarianAuthenticatedOrReadOnly, IsLibrarianAuthenticated, IsAdminAuthenticated
+from .permissions import LibrarianAuthenticatedOrReadOnly
+from .permissions import IsLibrarianAuthenticated, IsAdminAuthenticated
 
 
-class RegisterView(APIView):
-    
+class UserProfileView(APIView):
+    '''create or update user profile.'''
     permission_classes_post = []
     permission_classes_put = [IsAuthenticated]
     authentication_classes_put = [JWTAuthentication]
@@ -25,8 +28,8 @@ class RegisterView(APIView):
         '''to register as a new user'''
         try:
             data = request.data
-            password = data.get('password')  
-            hashed_password = make_password(password)  
+            password = data.get('password')
+            hashed_password = make_password(password)
             data['password'] = hashed_password
             serializer = UserSerializer(data=data)
             serializer = UserSerializer(data=data)
@@ -42,14 +45,14 @@ class RegisterView(APIView):
                 'data': {},
                 'message': 'your account is created'
             }, status=status.HTTP_201_CREATED)
-        
-        except Exception as e:
-            print(e)
+
+        except Exception as error:
+            print(error)
             return Response({
                 'data': {},
                 'message': 'something went wrong'
             }, status=status.HTTP_400_BAD_REQUEST)
-        
+
     def put(self, request):
         '''to update user profile info.'''
         try:
@@ -64,16 +67,16 @@ class RegisterView(APIView):
                     'data': serializer.errors,
                     'message': 'Validation failed'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
+
             serializer.save()
 
             return Response({
                 'data': {},
                 'message': 'Your profile has been updated'
             }, status=status.HTTP_200_OK)
-        
-        except Exception as e:
-            print(e)
+
+        except Exception as error:
+            print(error)
             return Response({
                 'data': {},
                 'message': 'Something went wrong'
@@ -83,6 +86,7 @@ class RegisterView(APIView):
 class LoginView(APIView):
     '''To make a user login (get jwt token)'''
     def post(self, request):
+        '''post request with correct credintials will return a jwt token.'''
         try:
             data = request.data
             serializer = UserLoginSerializer(data=data)
@@ -94,10 +98,10 @@ class LoginView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
             response = serializer.get_jwt_token(serializer.data)
 
-            return Response(response, status=status.HTTP_200_OK)  
-        
-        except Exception as e:
-            print(e)
+            return Response(response, status=status.HTTP_200_OK)
+
+        except Exception as error:
+            print(error)
             return Response({
                 'data': {},
                 'message': 'something went wrong'
@@ -105,6 +109,7 @@ class LoginView(APIView):
 
 
 class UserRoleListView(APIView):
+    '''for getting all the users available with roles. (only librarian/admin)'''
     permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
 
@@ -118,9 +123,9 @@ class UserRoleListView(APIView):
                     'message': 'success data',
                     'data': serializer.data
             }, status= status.HTTP_200_OK)
-            
-        except Exception as e:
-            print(e)
+
+        except Exception as error:
+            print(error)
             return Response({
                 'status': False,
                 'message': 'something went wrong!'
@@ -128,21 +133,23 @@ class UserRoleListView(APIView):
 
 
 class LibrarianRoleDetailView(APIView):
+    '''Detail view of user with role via id'''
     permission_classes = [IsAdminAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     def get_object(self, pk):
+        '''return user object of given id if available'''
         try:
             return User.objects.get(pk=pk)
         except User.DoesNotExist:
             raise Http404
-    
+
     def get(self, request, pk, format=None):
         '''method for admin to get a perticular user with its role'''
         user = self.get_object(pk)
         serializer = UserRoleSerializer(user)
         return Response (serializer.data)
-    
+
     def put(self, request, pk, format=None):
         '''method for admin to change the role of any user.'''
         user = self.get_object(pk)
@@ -173,6 +180,7 @@ def get_book_by_name_or_author(request, name, format=None):
 
 
 class UserBookRequestView(APIView):
+    '''list view of requests of a user'''
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
@@ -180,33 +188,43 @@ class UserBookRequestView(APIView):
         '''To get a user's issued books, pending request books and returned books.'''
         try:
             data = PendingRequest.objects.filter(request_user = request.user)
-            serializer = PendingRequestSerializer(data, many=True)
+            serializer = RequestSerializer(data, many=True)
             issued_books = request.user.issued_books.all()
             books_issued = []
 
             for book in issued_books:
                 books_issued.append(book.name)
 
-            requested_books = PendingRequest.objects.filter(Q(request_user = request.user) & Q(status='P'))
+            requested_books = PendingRequest.objects.filter(
+                Q(request_user = request.user) & Q(status='P')
+                )
             books_requested = []
 
             for book in requested_books:
                 books_requested.append(book.requested_book.name)
 
-            returned_books = PendingRequest.objects.filter(Q(request_user = request.user) & (Q(status='C') | Q(status='B')))
+            returned_books = PendingRequest.objects.filter(
+                Q(request_user=request.user) & (Q(status='C') | Q(status='B'))
+                )
             books_returned = []
-            
+
             for book in returned_books:
                 books_returned.append(book.requested_book.name)
-            
+
             return Response({
                     'status': True,
                     'message': 'success data',
-                    'data': {'books': {"issued books": books_issued, "requested books": books_requested, "returned books" : books_returned}}
+                    'data': {
+                        'books': {
+                            "issued books": books_issued,
+                            "requested books": books_requested,
+                            "returned books" : books_returned
+                            }
+                        }
             }, status= status.HTTP_200_OK)
-            
-        except Exception as e:
-            print(e)
+
+        except Exception as error:
+            print(error)
             return Response({
                 'status': False,
                 'message': 'something went wrong!'
@@ -217,14 +235,15 @@ class UserBookRequestView(APIView):
         data = request.data
         data['status'] = 'P'
         data['request_user'] = request.user.id
-        serializer = PendingRequestSerializer(data=data)
+        serializer = RequestSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
 
 class ListBookRequestView(APIView):
+    '''list view of requests (for librarian/admin only)'''
     permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
 
@@ -232,15 +251,15 @@ class ListBookRequestView(APIView):
         '''get all the pending requests.'''
         try:
             data = PendingRequest.objects.filter(status="P")
-            serializer = PendingRequestSerializer(data, many=True)
+            serializer = RequestSerializer(data, many=True)
             return Response({
                     'status': True,
                     'message': 'success data',
                     'data': serializer.data
             }, status= status.HTTP_200_OK)
 
-        except Exception as e:
-            print(e)
+        except Exception as error:
+            print(error)
             return Response({
                 'status': False,
                 'message': 'something went wrong!'
@@ -252,6 +271,7 @@ class DetailBookRequestView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get_object(self, pk):
+        '''returns requested pending request object if available'''
         try:
             return PendingRequest.objects.get(pk=pk)
         except PendingRequest.DoesNotExist:
@@ -260,7 +280,7 @@ class DetailBookRequestView(APIView):
     def get(self, request, pk, format=None):
         '''To get a specific user request.'''
         req = self.get_object(pk)
-        serializer = PendingRequestSerializer(req)
+        serializer = RequestSerializer(req)
         return Response (serializer.data)
 
     def put(self, request, pk, format=None):
@@ -268,7 +288,7 @@ class DetailBookRequestView(APIView):
         req = self.get_object(pk)
 
         request.data['requested_book'] = req.requested_book.id
-        serializer = PendingRequestSerializer(req, data=request.data)
+        serializer = RequestSerializer(req, data=request.data)
         if serializer.is_valid():
             instance = serializer.save()
             if request.data['status'] == 'A':
@@ -277,8 +297,8 @@ class DetailBookRequestView(APIView):
                     instance.request_user.issued_books.add(book)
                     book.number_of_books -= 1
                     book.save()
-                except Exception as e:
-                    print(e)
+                except Exception as error:
+                    print(error)
 
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -289,17 +309,21 @@ class ReturnBookView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get_object(self, pk):
+        '''return requested request object if available'''
         try:
             return PendingRequest.objects.get(pk=pk)
         except PendingRequest.DoesNotExist:
             raise Http404
-    
+
     def put(self, request, pk, format=None):
-        '''User method to request to return back the book (which needs to be approved by librarian)'''
+        '''
+        User method to request to return back the book 
+        (needs to be approved by librarian)
+        '''
         req = self.get_object(pk)
         request.data['requested_book'] = req.requested_book.id
-        serializer = PendingRequestSerializer(req, data=request.data)
-            
+        serializer = RequestSerializer(req, data=request.data)
+
         if req.request_user == request.user:
             request.data['status'] = 'B'
 
@@ -307,14 +331,18 @@ class ReturnBookView(APIView):
                 serializer.save()
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'message': "the user is not authorized"},status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(
+            {'message': "the user is not authorized"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
 
-                
+
 class CloseBookRequest(APIView):
     permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     def get_object(self, pk):
+        '''return requested request object if available'''
         try:
             return PendingRequest.objects.get(pk=pk)
         except PendingRequest.DoesNotExist:
@@ -323,7 +351,7 @@ class CloseBookRequest(APIView):
     def put(self, request, pk, format=None):
         '''Librarian method to close a request if user has requested to close it.'''
         req = self.get_object(pk)
-        serializer = ReturnRequestSerializer(req, data=request.data)
+        serializer = RequestSerializer(req, data=request.data)
 
         if req.status == 'B':
             if serializer.is_valid():
@@ -335,9 +363,12 @@ class CloseBookRequest(APIView):
                         instance.request_user.issued_books.remove(book)
                         book.number_of_books += 1
                         book.save()
-                    except Exception as e:
-                        print(e)
+                    except Exception as error:
+                        print(error)
 
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({"message": "user has not opened a closed request"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        return Response(
+            {"message": "user has not opened a closed request"},
+            status=status.HTTP_406_NOT_ACCEPTABLE
+            )

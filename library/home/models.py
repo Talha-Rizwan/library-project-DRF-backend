@@ -34,8 +34,7 @@ class Book(models.Model):
     author_name = models.CharField(max_length=50)
     publisher_name = models.CharField(max_length=50)
     number_of_books = models.PositiveIntegerField()
-    
-    #To-Do : Add the image field  
+    cover_image = models.ImageField(null=True, default='book.jpeg')
 
     def __str__(self):
         return self.name

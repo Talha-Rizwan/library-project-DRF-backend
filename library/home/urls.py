@@ -1,12 +1,15 @@
 from django.urls import path
 
 from rest_framework.urlpatterns import format_suffix_patterns
+from rest_framework.routers import DefaultRouter
 
 from home import views
 
+router = DefaultRouter()
+router.register(r'book-view-set', views.BookViewSet, basename='book')
+
+
 urlpatterns = [
-    path('book-list/',views.book_list.as_view(), name='book-list' ),
-    path('book-detail/<int:pk>/',views.book_detail.as_view(), name='book-detail' ),
     path('book-detail-name/<str:name>/', views.get_book_by_name_or_author, name='book-detail-name'),
     path('user-profile/', views.RegisterView.as_view(), name='user-profile'),
     path('login/', views.LoginView.as_view(), name='login'),
@@ -19,4 +22,6 @@ urlpatterns = [
     path('users/', views.UserRoleListView.as_view(), name='users'),
 
 ]
-urlpatterns = format_suffix_patterns(urlpatterns)
+urlpatterns += router.urls
+
+# urlpatterns = format_suffix_patterns(urlpatterns)

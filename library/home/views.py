@@ -5,7 +5,7 @@ from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
@@ -152,85 +152,14 @@ class LibrarianRoleDetailView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# TO-DO convert this to view sets
-class book_list(APIView):
-    '''To Create a new book or Get all the books'''
-    permission_classes = [LibrarianAuthenticatedOrReadOnly]
-    authentication_classes = [JWTAuthentication]
-    def get(self, request):
-        try:
-            data = Book.objects.all()
-            serializer = BookSerializer(data, many=True)
-            return Response({
-                    'status': True,
-                    'message': 'success data',
-                    'data': serializer.data
-            }, status= status.HTTP_200_OK)
-            
-        except Exception as e:
-            print(e)
-            return Response({
-                'status': False,
-                'message': 'something went wrong!'
-            })
-
-    def post(self, request):
-        try:
-            data = request.data
-            serializer = BookSerializer(data=data)
-            if serializer.is_valid():
-                serializer.save()
-
-                return Response({
-                    'status': True,
-                    'message': 'success data',
-                    'data': serializer.data
-                })
-                
-            return Response({
-                'status': False,
-                'message': 'invalid data',
-                'data': serializer.errors
-            })
-        
-        except Exception as e:
-            print(e)
-            return Response({
-                'status': False,
-                'message': 'something went wrong!'
-            })
-
-
-class book_detail(APIView):
-    '''To perform Get, Update and Delete operations on a single book by passing id.'''
+class BookViewSet(viewsets.ModelViewSet):
+    '''CRUD operations for Books, user role has read only access.'''
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
     permission_classes = [LibrarianAuthenticatedOrReadOnly]
     authentication_classes = [JWTAuthentication]
 
-    def get_object(self, pk):
-        try:
-            return Book.objects.get(pk=pk)
-        except Book.DoesNotExist:
-            raise Http404
 
-    def get(self, request, pk, format=None):
-        book = self.get_object(pk)
-        serializer = BookSerializer(book)
-        return Response (serializer.data)
-
-    def put(self, request, pk, format=None):
-        book = self.get_object(pk)
-        serializer = BookSerializer(book, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk, format=None):
-        book = self.get_object(pk)
-        book.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-##################
 
 @api_view(['GET'])
 def get_book_by_name_or_author(request, name, format=None):

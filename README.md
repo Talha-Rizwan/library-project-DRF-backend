@@ -1,6 +1,5 @@
 # Library_management_system
 
-
 ALL API Details:
 
 
@@ -8,7 +7,7 @@ ALL API Details:
 
 
 Api : to create a book object in library: (authentication needed, user role ‘admin’ or ‘role’)
-Url : http://127.0.0.1:8000/api/book-list/
+Url : http://127.0.0.1:8000/api/book-view-set/
 Method : Post
 Body:
  {
@@ -19,15 +18,15 @@ Body:
 }
 
 Api : to get all books in library: 
-Url : http://127.0.0.1:8000/api/book-list/
+Url : http://127.0.0.1:8000/api/book-view-set/
 Method : Get
 
 Api : to get a single book
-Url : http://127.0.0.1:8000/api/book-detail/id/
+Url : http://127.0.0.1:8000/api/book-view-set/id/
 Method : Get
 
 Api : to update a book (authentication needed, user role ‘admin’ or ‘role’)
-Url : http://127.0.0.1:8000/api/book-detail/id/
+Url : http://127.0.0.1:8000/api/book-view-set/id/
 Method : Put
 Body: 
 {
@@ -39,7 +38,7 @@ Body:
 }
 
 Api : to delete a book (authentication needed, user role ‘admin’ or ‘role’)
-Url : http://127.0.0.1:8000/api/book-detail/id/
+Url : http://127.0.0.1:8000/api/book-view-set/id/
 Method : Delete
 
 Api : to get books by their name or author name (not exact name necessary)
@@ -51,7 +50,7 @@ Method : Get
 
 
 Api : to register a new user 
-Url : http://127.0.0.1:8000/api/register/
+Url : http://127.0.0.1:8000/api/user-profile/
 Method : Post
 Body: 
 {
@@ -72,7 +71,7 @@ Body:
 }
 
 Api : to update user profile
-Url : http://127.0.0.1:8000/api/update-profile/
+Url : http://127.0.0.1:8000/api/user-profile/
 Method : Put
 Body: 
 {

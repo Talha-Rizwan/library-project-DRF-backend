@@ -12,7 +12,7 @@ class BookSerializer(serializers.ModelSerializer):
     class Meta:
         '''The model class associated with this serializer is Book and includes all fields'''
         model = Book
-        fields = '__all__'
+        fields = ['name', 'author_name', 'publisher_name', 'number_of_books', 'cover_image']
 
 # pylint: disable=R0903
 class UserSerializer(serializers.ModelSerializer):
@@ -69,7 +69,7 @@ class RequestSerializer(serializers.ModelSerializer):
         PendingRequest and includes all fields
         '''
         model = PendingRequest
-        fields = '__all__'
+        fields = ['request_user', 'requested_book', 'created', 'status']
 
     def validate(self, data):
         '''

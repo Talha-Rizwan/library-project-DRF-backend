@@ -227,16 +227,6 @@ class get_book_by_name_or_author(APIView):
         except Book.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-# @api_view(['GET'])
-# def get_book_by_name_or_author(request, name, format=None):
-#     '''To search book by Book name or Author name.'''
-#     try:
-#         books = Book.objects.filter(Q(name__icontains=name) | Q(author_name__icontains=name))
-#         serializer = BookSerializer(books, many=True)
-#         return Response(serializer.data)
-#     except Book.DoesNotExist:
-#         return Response(status=status.HTTP_404_NOT_FOUND)
-
 
 class UserBookRequestView(APIView):
     '''list view of requests of a user'''

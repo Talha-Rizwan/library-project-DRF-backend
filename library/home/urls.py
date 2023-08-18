@@ -10,7 +10,7 @@ router.register(r'book-view-set', views.BookViewSet, basename='book')
 
 
 urlpatterns = [
-    path('book-detail-name/<str:name>/', views.get_book_by_name_or_author, name='book-detail-name'),
+    path('book-detail-name/<str:name>/', views.get_book_by_name_or_author.as_view(), name='book-detail-name'),
     path('user-profile/', views.UserProfileView.as_view(), name='user-profile'),
     path('login/', views.LoginView.as_view(), name='login'),
     path('user-request/', views.UserBookRequestView.as_view(), name='pending-request'),
@@ -20,6 +20,5 @@ urlpatterns = [
     path('close-request/<int:pk>/', views.CloseBookRequest.as_view(), name='close-request'),
     path('user-role/<int:pk>/',views.LibrarianRoleDetailView.as_view(), name='user-role'),
     path('users/', views.UserRoleListView.as_view(), name='users'),
-
 ]
 urlpatterns += router.urls

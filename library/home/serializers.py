@@ -61,8 +61,6 @@ class UserRoleSerializer(serializers.ModelSerializer):
 
 class RequestSerializer(serializers.ModelSerializer):
     '''generic pending request class serializer'''
-    # request_user = UserSerializer()
-    # requested_book = BookSerializer()
     class Meta:
         '''
         The model class associated with this serializer is

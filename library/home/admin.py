@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import User, Book, PendingRequest
+from home.models import User, Book, PendingRequest
 
 admin.site.register(User)
 admin.site.register(Book)

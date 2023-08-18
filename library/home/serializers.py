@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Book, User, PendingRequest
+from home.models import Book, User, PendingRequest
 
 # pylint: disable=R0903
 class BookSerializer(serializers.ModelSerializer):

@@ -12,11 +12,11 @@ from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .serializers import BookSerializer, UserSerializer, UserLoginSerializer
-from .serializers import RequestSerializer, UserRoleSerializer
-from .models import Book, PendingRequest, User
-from .permissions import LibrarianAuthenticatedOrReadOnly
-from .permissions import IsLibrarianAuthenticated, IsAdminAuthenticated
+from home.serializers import BookSerializer, UserSerializer, UserLoginSerializer
+from home.serializers import RequestSerializer, UserRoleSerializer
+from home.models import Book, PendingRequest, User
+from home.permissions import LibrarianAuthenticatedOrReadOnly
+from home.permissions import IsLibrarianAuthenticated, IsAdminAuthenticated
 
 
 class UserProfileView(APIView):

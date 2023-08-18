@@ -27,7 +27,7 @@ class Book(models.Model):
     name = models.CharField(max_length=50)
     author_name = models.CharField(max_length=50)
     publisher_name = models.CharField(max_length=50)
-    number_of_books = models.PositiveIntegerField()
+    number_of_books = models.PositiveSmallIntegerField()
     cover_image = models.ImageField(null=True, default='book.jpeg')
 
     def __str__(self):

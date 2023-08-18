@@ -1,7 +1,6 @@
 '''All routes for the requests at api/ '''
 from django.urls import path
 
-# from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework.routers import DefaultRouter
 
 from home import views
@@ -24,5 +23,3 @@ urlpatterns = [
 
 ]
 urlpatterns += router.urls
-
-# urlpatterns = format_suffix_patterns(urlpatterns)

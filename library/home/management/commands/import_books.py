@@ -1,13 +1,8 @@
-'''customize managment commands classes'''
 import csv
 
 from django.core.management.base import BaseCommand
 
 from home.models import Book
-
-# Command to run :
-# python manage.py import_books
-# /Users/talha.malik/Desktop/library_project/library_management_system/books_data.csv
 
 class Command(BaseCommand):
     '''customize command to create new books from csv file'''
@@ -21,16 +16,20 @@ class Command(BaseCommand):
         '''method to create new users by reading data from csv file'''
         csv_file = kwargs['csv_file']
 
-        with open(csv_file,encoding='utf-8') as file:
-            reader = csv.reader(file)
-            next(reader)
+        books_to_create = []
+
+        with open(csv_file, encoding='utf-8') as file:
+            reader = csv.DictReader(file)
 
             for row in reader:
-                book = Book.objects.create(
-                    name=row[0],
-                    author_name=row[1],
-                    publisher_name=row[2],
-                    number_of_books=int(row[3])
-                    )
+                book = Book(
+                    name=row['name'],
+                    author_name=row['author'],
+                    publisher_name=row['publisher'],
+                    number_of_books=int(row['number of books'])
+                )
+                books_to_create.append(book)
 
-                self.stdout.write(self.style.SUCCESS(f'Successfully imported book: {book}')) # pylint: disable=no-member
+        Book.objects.bulk_create(books_to_create)
+
+        self.stdout.write(self.style.SUCCESS(f'Successfully imported {len(books_to_create)} books'))

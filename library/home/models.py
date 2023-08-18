@@ -1,6 +1,9 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from home.constants import GENDER_CHOICES, ROLE_CHOICES, STATUS_CHOICES
+
+
 class User(AbstractUser):
     """
     User Class inherited from in-built AbstractUser 
@@ -8,18 +11,9 @@ class User(AbstractUser):
     """
     full_name = models.CharField(max_length=255)
     phone = models.CharField(max_length=20, blank=True, null=True)
-    gender_choices = (
-        ('M', 'Male'),
-        ('F', 'Female'),
-        ('O', 'Other'),
-    )
-    gender = models.CharField(max_length=1, choices=gender_choices, blank=True, null=True)
-    role_choices = (
-        ('A', 'Admin'),
-        ('L', 'Librarian'),
-        ('C', 'Customer'),
-    )
-    role = models.CharField(max_length=1, choices=role_choices, null=False, default='C')
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True)
+    
+    role = models.CharField(max_length=1, choices=ROLE_CHOICES, null=False, default='C')
     issued_books = models.ManyToManyField('Book', blank=True, related_name='users')
 
 
@@ -45,14 +39,7 @@ class PendingRequest(models.Model):
     request_user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
     requested_book = models.ForeignKey(Book, on_delete=models.CASCADE, blank=True)
     created = models.DateTimeField(auto_now_add=True)
-    status_choices = (
-        ('P', 'Pending'),
-        ('A', 'Approved'),
-        ('R', 'Rejected'),
-        ('B', 'Back Return'),
-        ('C', 'Closed')
-    )
-    status = models.CharField(max_length=1, choices=status_choices, null=False, default='P')
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, null=False, default='P')
 
     def __str__(self):
         return f'Request from {self.request_user.full_name} for {self.requested_book.name} - {self.status}'

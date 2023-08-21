@@ -9,7 +9,7 @@ class BookSerializer(serializers.ModelSerializer):
     class Meta:
         '''The model class associated with this serializer is Book and includes all fields'''
         model = Book
-        fields = ['name', 'author_name', 'publisher_name', 'number_of_books', 'cover_image']
+        fields = ['id', 'name', 'author_name', 'publisher_name', 'number_of_books', 'cover_image']
 
 # pylint: disable=R0903
 class UserSerializer(serializers.ModelSerializer):

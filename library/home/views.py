@@ -131,68 +131,21 @@ class LoginView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserRoleListView(APIView):
+class UserRoleListView(generics.ListAPIView):
     '''for getting all the users available with roles. (only librarian/admin)'''
+    queryset = User.objects.all()
+    serializer_class = UserRoleSerializer
     permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def get(self, request):
-        '''method for librarian/admin to get all the users with roles.'''
-        try:
-            data = User.objects.all()
-            serializer = UserRoleSerializer(data, many=True)
-            return Response({
-                    'status': True,
-                    'message': 'success data',
-                    'data': serializer.data
-            }, status= status.HTTP_200_OK)
 
-        except ValidationError as validation_error:
-            return Response({
-                'data': validation_error.detail,
-                'message': 'validation failed'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        except IntegrityError:
-            return Response({
-                'data': {},
-                'message': 'database integrity error'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as error:
-            print(error)
-            return Response({
-                'status': False,
-                'message': 'something went wrong!'
-            })
-
-
-class LibrarianRoleDetailView(APIView):
+class LibrarianRoleDetailView(generics.RetrieveUpdateAPIView):
     '''Detail view of user with role via id'''
+    queryset = User.objects.all()
+    serializer_class = UserRoleSerializer
     permission_classes = [IsAdminAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def get_object(self, pk):
-        '''return user object of given id if available'''
-        try:
-            return User.objects.get(pk=pk)
-        except User.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        '''method for admin to get a perticular user with its role'''
-        user = self.get_object(pk)
-        serializer = UserRoleSerializer(user)
-        return Response (serializer.data)
-
-    def put(self, request, pk, format=None):
-        '''method for admin to change the role of any user.'''
-        user = self.get_object(pk)
-        serializer = UserRoleSerializer(user, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class BookViewSet(viewsets.ModelViewSet):
     '''CRUD operations for Books, user role has read only access.'''
@@ -202,15 +155,15 @@ class BookViewSet(viewsets.ModelViewSet):
     authentication_classes = [JWTAuthentication]
 
 
-class get_book_by_name_or_author(APIView):
-    '''To search book by Book name or Author name.'''
-    def get(self, request, name, format=None):
-        try:
-            books = Book.objects.filter(Q(name__icontains=name) | Q(author_name__icontains=name))
-            serializer = BookSerializer(books, many=True)
-            return Response(serializer.data)
-        except Book.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+
+class GetBookByNameOrAuthor(generics.ListAPIView):
+    '''To search books by Book name or Author name.'''
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+
+    def get_queryset(self):
+        name = self.kwargs.get('name')
+        return Book.objects.filter(Q(name__icontains=name) | Q(author_name__icontains=name))
 
 
 class UserBookRequestView(APIView):

@@ -4,6 +4,7 @@ from django.contrib.auth.hashers import make_password
 from django.http import Http404
 from django.db.utils import IntegrityError
 
+from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -273,28 +274,11 @@ class UserBookRequestView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ListBookRequestView(APIView):
-    '''list view of requests (for librarian/admin only)'''
+class ListBookRequestView(generics.ListAPIView):
+    queryset = PendingRequest.objects.filter(status="P")
+    serializer_class = RequestSerializer
     permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
-
-    def get(self, request):
-        '''get all the pending requests.'''
-        try:
-            data = PendingRequest.objects.filter(status="P")
-            serializer = RequestSerializer(data, many=True)
-            return Response({
-                    'status': True,
-                    'message': 'success data',
-                    'data': serializer.data
-            }, status= status.HTTP_200_OK)
-
-        except Exception as error:
-            print(error)
-            return Response({
-                'status': False,
-                'message': 'something went wrong!'
-            })
 
 
 class DetailBookRequestView(APIView):

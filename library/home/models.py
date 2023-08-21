@@ -14,8 +14,6 @@ class User(AbstractUser):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True)
     
     role = models.CharField(max_length=1, choices=ROLE_CHOICES, null=False, default='C')
-    issued_books = models.ManyToManyField('Book', blank=True, related_name='users')
-
 
     REQUIRED_FIELDS = []
 

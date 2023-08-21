@@ -165,7 +165,6 @@ class GetBookByNameOrAuthor(generics.ListAPIView):
         name = self.kwargs.get('name')
         return Book.objects.filter(Q(name__icontains=name) | Q(author_name__icontains=name))
 
-
 class UserBookRequestView(APIView):
     '''list view of requests of a user'''
     permission_classes = [IsAuthenticated]
@@ -174,11 +173,13 @@ class UserBookRequestView(APIView):
     def get(self, request):
         '''To get a user's issued books, pending request books and returned books.'''
         try:
-            issued_books = request.user.issued_books.all()
+            issued_books = PendingRequest.objects.filter(
+                Q(request_user=request.user) & Q(status='A')
+                )
             books_issued = []
 
             for book in issued_books:
-                books_issued.append(book.name)
+                books_issued.append(book.requested_book.name)
 
             requested_books = PendingRequest.objects.filter(
                 Q(request_user = request.user) & Q(status='P')
@@ -264,7 +265,6 @@ class DetailBookRequestView(APIView):
             if request.data['status'] == 'A':
                 try:
                     book = Book.objects.get(pk=instance.requested_book.id)
-                    instance.request_user.issued_books.add(book)
                     book.number_of_books -= 1
                     book.save()
                 except Exception as error:
@@ -272,7 +272,6 @@ class DetailBookRequestView(APIView):
 
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class ReturnBookView(APIView):
     '''user view to initiate a return request.'''
@@ -307,7 +306,6 @@ class ReturnBookView(APIView):
             status=status.HTTP_405_METHOD_NOT_ALLOWED
             )
 
-
 class CloseBookRequest(APIView):
     '''Librarian view to close a return book request.'''
     permission_classes = [IsLibrarianAuthenticated]
@@ -332,7 +330,6 @@ class CloseBookRequest(APIView):
                 if request.data['status'] == 'C':
                     try:
                         book = Book.objects.get(pk=instance.requested_book.id)
-                        instance.request_user.issued_books.remove(book)
                         book.number_of_books += 1
                         book.save()
                     except Exception as error:

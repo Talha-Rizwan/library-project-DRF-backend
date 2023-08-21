@@ -1,8 +1,5 @@
 '''All serializers for home application models'''
-from django.contrib.auth import authenticate
-
 from rest_framework import serializers
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from home.models import Book, User, PendingRequest
 
@@ -34,22 +31,6 @@ class UserLoginSerializer(serializers.Serializer):
             raise serializers.ValidationError('account do not exist')
         return data
 
-    def get_jwt_token(self, data):
-        '''To get the jwt token for user authentication'''
-        user = authenticate(username=data['username'], password=data['password'])
-
-        if not user:
-            return {'message': 'imvalid credentials', 'data': {}}
-        refresh = RefreshToken.for_user(user)
-        return {
-            'message': 'login success',
-            'data': {
-                'token':{
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token)
-                    }
-                }
-            }
 # pylint: disable=R0903
 class UserRoleSerializer(serializers.ModelSerializer):
     '''User serializer specific for user role functionality'''

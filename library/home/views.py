@@ -6,7 +6,6 @@ from django.db.utils import IntegrityError
 
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
@@ -17,7 +16,7 @@ from home.serializers import RequestSerializer, UserRoleSerializer
 from home.models import Book, PendingRequest, User
 from home.permissions import LibrarianAuthenticatedOrReadOnly
 from home.permissions import IsLibrarianAuthenticated, IsAdminAuthenticated
-
+from home.utils import get_jwt_token
 
 class UserProfileView(APIView):
     '''create or update user profile.'''
@@ -122,7 +121,7 @@ class LoginView(APIView):
                     'data': {},
                     'message': 'something went wrong'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            response = serializer.get_jwt_token(serializer.data)
+            response = get_jwt_token(serializer.data)
 
             return Response(response, status=status.HTTP_200_OK)
 

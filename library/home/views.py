@@ -32,11 +32,7 @@ class UserProfileView(APIView):
             data['password'] = make_password(password)
             serializer = UserSerializer(data=data)
 
-            if not serializer.is_valid():
-                return Response({
-                    'data': serializer.errors,
-                    'message': 'validation failed'
-                }, status=status.HTTP_400_BAD_REQUEST)
+            serializer.is_valid(raise_exception=True)
             serializer.save()
 
             return Response({
@@ -72,12 +68,7 @@ class UserProfileView(APIView):
             data.pop('password', None)
             serializer = UserSerializer(user, data=data, partial=True)
 
-            if not serializer.is_valid():
-                return Response({
-                    'data': serializer.errors,
-                    'message': 'Validation failed'
-                }, status=status.HTTP_400_BAD_REQUEST)
-
+            serializer.is_valid(raise_exception=True)
             serializer.save()
 
             return Response({
@@ -114,11 +105,7 @@ class LoginView(APIView):
             data = request.data
             serializer = UserLoginSerializer(data=data)
 
-            if not serializer.is_valid():
-                return Response({
-                    'data': {},
-                    'message': 'something went wrong'
-                }, status=status.HTTP_400_BAD_REQUEST)
+            serializer.is_valid(raise_exception=True)
             response = get_jwt_token(serializer.data)
 
             return Response(response, status=status.HTTP_200_OK)

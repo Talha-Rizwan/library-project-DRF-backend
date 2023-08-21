@@ -29,9 +29,7 @@ class UserProfileView(APIView):
         try:
             data = request.data
             password = data.get('password')
-            hashed_password = make_password(password)
-            data['password'] = hashed_password
-            serializer = UserSerializer(data=data)
+            data['password'] = make_password(password)
             serializer = UserSerializer(data=data)
 
             if not serializer.is_valid():

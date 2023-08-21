@@ -143,7 +143,7 @@ class LibrarianRoleDetailView(generics.RetrieveUpdateAPIView):
     '''Detail view of user with role via id'''
     queryset = User.objects.all()
     serializer_class = UserRoleSerializer
-    permission_classes = [IsAdminAuthenticated]
+    permission_classes = [ IsAdminAuthenticated]
     authentication_classes = [JWTAuthentication]
 
 
@@ -228,6 +228,7 @@ class UserBookRequestView(APIView):
 
 
 class ListBookRequestView(generics.ListAPIView):
+    '''all the pending requests list view'''
     queryset = PendingRequest.objects.filter(status="P")
     serializer_class = RequestSerializer
     permission_classes = [IsLibrarianAuthenticated]

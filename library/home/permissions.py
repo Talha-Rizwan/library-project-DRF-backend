@@ -8,15 +8,15 @@ class LibrarianAuthenticatedOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True  
-        return request.user and request.user.is_authenticated and (request.user.role == 'A' or request.user.role == 'L')
+        return request.user.has_perm('home.is_admin') or request.user.has_perm('home.is_librarian')
 
 class IsLibrarianAuthenticated(BasePermission):
     """Custom permission to allow only admin or librarian for CRUD."""
     def has_permission(self, request, view): 
-        return request.user and request.user.is_authenticated and (request.user.role == 'A' or request.user.role == 'L')
+        return request.user.has_perm('home.is_admin') or request.user.has_perm('home.is_librarian')
 
 class IsAdminAuthenticated(BasePermission):
     """Custom permission to allow only admin for CRUD."""
     def has_permission(self, request, view): 
-        return request.user and request.user.is_authenticated and request.user.role == 'A'
+        return request.user.has_perm('home.is_admin')
 

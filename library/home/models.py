@@ -19,6 +19,12 @@ class User(AbstractUser):
 
     REQUIRED_FIELDS = []
 
+    class Meta:
+        permissions = [
+            ('is_librarian', 'Is librarian or above'),
+            ('is_admin', 'Is an admin')
+        ]
+
     def __str__(self):
         return self.username
 

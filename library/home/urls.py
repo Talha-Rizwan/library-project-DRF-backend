@@ -1,4 +1,4 @@
-'''All routes for the requests at api/ '''
+'''All routes for the requests at api/home/ '''
 from django.urls import path
 
 from rest_framework.routers import DefaultRouter

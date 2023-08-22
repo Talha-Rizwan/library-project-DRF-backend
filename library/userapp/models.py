@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-from home.constants import GENDER_CHOICES, ROLE_CHOICES
+from userapp.constants import GENDER_CHOICES, ROLE_CHOICES
 
 class User(AbstractUser):
     """

@@ -1,4 +1,4 @@
-'''all utility functions are available here.'''
+'''all utility functions for this app are available here.'''
 from django.contrib.auth import authenticate
 
 from rest_framework_simplejwt.tokens import RefreshToken

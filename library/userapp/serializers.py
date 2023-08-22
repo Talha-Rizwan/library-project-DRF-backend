@@ -1,3 +1,4 @@
+'''Serializers for the User model.'''
 from rest_framework import serializers
 
 from userapp.models import User

@@ -1,3 +1,4 @@
+'''Custom Permissions to give different roles to different type of users.'''
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 class LibrarianAuthenticatedOrReadOnly(BasePermission):

@@ -1,7 +1,6 @@
 from django.db import models
 
 from home.constants import STATUS_CHOICES
-
 from userapp.models import User
 
 

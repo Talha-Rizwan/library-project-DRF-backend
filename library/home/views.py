@@ -11,8 +11,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from home.serializers import BookSerializer, RequestSerializer
 from home.models import Book, PendingRequest
-from userapp.permissions import LibrarianAuthenticatedOrReadOnly
-from userapp.permissions import IsLibrarianAuthenticated
+from userapp.permissions import LibrarianAuthenticatedOrReadOnly, IsLibrarianAuthenticated
 
 
 class BookViewSet(viewsets.ModelViewSet):
@@ -21,8 +20,6 @@ class BookViewSet(viewsets.ModelViewSet):
     serializer_class = BookSerializer
     permission_classes = [LibrarianAuthenticatedOrReadOnly]
     authentication_classes = [JWTAuthentication]
-
-
 
 class GetBookByNameOrAuthor(generics.ListAPIView):
     '''To search books by Book name or Author name.'''
@@ -94,7 +91,6 @@ class UserBookRequestView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class ListBookRequestView(generics.ListAPIView):
     '''all the pending requests list view'''

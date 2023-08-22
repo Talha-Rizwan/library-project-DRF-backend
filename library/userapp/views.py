@@ -1,4 +1,4 @@
-'''views of all the home class requests on url api/'''
+'''views of all the userapp class requests on url api/user/'''
 from django.contrib.auth.hashers import make_password
 from django.db.utils import IntegrityError
 
@@ -93,7 +93,6 @@ class UserProfileView(APIView):
                 'message': 'Something went wrong'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-
 class LoginView(APIView):
     '''To make a user login (get jwt token)'''
 
@@ -127,7 +126,6 @@ class LoginView(APIView):
                 'message': 'something went wrong'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-
 class UserRoleListView(generics.ListAPIView):
     '''for getting all the users available with roles. (only librarian/admin)'''
     queryset = User.objects.all()
@@ -135,11 +133,9 @@ class UserRoleListView(generics.ListAPIView):
     permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-
 class LibrarianRoleDetailView(generics.RetrieveUpdateAPIView):
     '''Detail view of user with role via id'''
     queryset = User.objects.all()
     serializer_class = UserRoleSerializer
     permission_classes = [ IsAdminAuthenticated]
     authentication_classes = [JWTAuthentication]
-

@@ -3,7 +3,7 @@ from django.db.models import Q
 
 from rest_framework import serializers
 
-from home.models import Book, User, PendingRequest
+from home.models import Book, PendingRequest
 
 # pylint: disable=R0903
 class BookSerializer(serializers.ModelSerializer):
@@ -13,33 +13,6 @@ class BookSerializer(serializers.ModelSerializer):
         model = Book
         fields = ['id', 'name', 'author_name', 'publisher_name', 'number_of_books', 'cover_image']
 
-# pylint: disable=R0903
-class UserSerializer(serializers.ModelSerializer):
-    '''Generic user serializer for user model'''
-    class Meta:
-        '''The model class associated with this serializer is User and includes certain fields'''
-        model = User
-        fields = ['username', 'password', 'full_name', 'phone', 'gender']
-
-class UserLoginSerializer(serializers.Serializer):
-    '''user serializer specific for login functionality'''
-    username = serializers.CharField()
-    password = serializers.CharField()
-
-    def vaildate(self, data):
-        '''To validate the user exists or not.'''
-
-        if not User.objects.filter(username = data['username']).exists():
-            raise serializers.ValidationError('account do not exist')
-        return data
-
-# pylint: disable=R0903
-class UserRoleSerializer(serializers.ModelSerializer):
-    '''User serializer specific for user role functionality'''
-    class Meta:
-        '''The model class associated with this serializer is User and includes certain fields'''
-        model = User
-        fields = ['id', 'username', 'role']
 
 
 class RequestSerializer(serializers.ModelSerializer):

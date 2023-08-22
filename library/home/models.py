@@ -1,3 +1,4 @@
+'''Models of home application.'''
 from django.db import models
 
 from home.constants import STATUS_CHOICES

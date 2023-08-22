@@ -1,4 +1,4 @@
-'''All routes for the requests at api/ '''
+'''All routes for the requests at api/user/ '''
 from django.urls import path
 
 from userapp import views

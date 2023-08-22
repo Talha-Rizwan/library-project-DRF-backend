@@ -15,7 +15,7 @@ class BookSerializer(serializers.ModelSerializer):
 
 
 class RequestSerializer(serializers.ModelSerializer):
-    '''generic pending request class serializer'''
+    '''Generic pending request class serializer'''
     class Meta:
         '''
         The model class associated with this serializer is
@@ -26,7 +26,7 @@ class RequestSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         '''
-        user request validation for issued books not more than 3 
+        User request validation for issued books not more than 3 
         and requested book copy is available.
         '''
         is_creation = self.instance is None

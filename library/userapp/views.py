@@ -1,4 +1,4 @@
-'''views of all the userapp class requests on url api/user/'''
+'''Views of all the userapp class requests on url api/user/'''
 from django.contrib.auth.hashers import make_password
 from django.db.utils import IntegrityError
 
@@ -17,13 +17,13 @@ from userapp.utlis import get_jwt_token
 
 
 class UserProfileView(APIView):
-    '''create or update user profile.'''
+    '''Create or update user profile.'''
     permission_classes_post = []
     permission_classes_put = [IsAuthenticated]
     authentication_classes_put = [JWTAuthentication]
 
     def post(self, request):
-        '''to register as a new user'''
+        '''To register as a new user.'''
         try:
             data = request.data
             password = data.get('password')
@@ -58,7 +58,7 @@ class UserProfileView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request):
-        '''to update user profile info.'''
+        '''To update user profile details.'''
         try:
             user = request.user
             data = request.data
@@ -77,13 +77,13 @@ class UserProfileView(APIView):
         except ValidationError as validation_error:
             return Response({
                 'data': validation_error.detail,
-                'message': 'validation failed'
+                'message': 'Validation failed'
             }, status=status.HTTP_400_BAD_REQUEST)
 
         except IntegrityError:
             return Response({
                 'data': {},
-                'message': 'database integrity error'
+                'message': 'Database integrity error'
             }, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as error:
@@ -97,7 +97,7 @@ class LoginView(APIView):
     '''To make a user login (get jwt token)'''
 
     def post(self, request):
-        '''post request with correct credintials will return a jwt token.'''
+        '''Post request with correct credintials will return a jwt token.'''
         try:
             data = request.data
             serializer = UserLoginSerializer(data=data)
@@ -110,24 +110,24 @@ class LoginView(APIView):
         except ValidationError as validation_error:
             return Response({
                 'data': validation_error.detail,
-                'message': 'validation failed'
+                'message': 'Validation failed'
             }, status=status.HTTP_400_BAD_REQUEST)
 
         except IntegrityError:
             return Response({
                 'data': {},
-                'message': 'database integrity error'
+                'message': 'Database integrity error'
             }, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as error:
             print(error)
             return Response({
                 'data': {},
-                'message': 'something went wrong'
+                'message': 'Something went wrong'
             }, status=status.HTTP_400_BAD_REQUEST)
 
 class UserRoleListView(generics.ListAPIView):
-    '''for getting all the users available with roles. (only librarian/admin)'''
+    '''For getting all the users available with roles. (only librarian/admin)'''
     queryset = User.objects.all()
     serializer_class = UserRoleSerializer
     permission_classes = [IsLibrarianAuthenticated]

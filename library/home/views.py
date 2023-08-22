@@ -31,7 +31,7 @@ class GetBookByNameOrAuthor(generics.ListAPIView):
         return Book.objects.filter(Q(name__icontains=name) | Q(author_name__icontains=name))
 
 class UserBookRequestView(APIView):
-    '''list view of requests of a user'''
+    '''List view of requests of a user'''
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
@@ -67,9 +67,9 @@ class UserBookRequestView(APIView):
                     'message': 'success data',
                     'data': {
                         'books': {
-                            "issued books": books_issued,
-                            "requested books": books_requested,
-                            "returned books" : books_returned
+                            'issued books': books_issued,
+                            'requested books': books_requested,
+                            'returned books' : books_returned
                             }
                         }
             }, status= status.HTTP_200_OK)
@@ -93,20 +93,20 @@ class UserBookRequestView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ListBookRequestView(generics.ListAPIView):
-    '''all the pending requests list view'''
-    queryset = PendingRequest.objects.filter(status="P")
+    '''All the pending requests list view'''
+    queryset = PendingRequest.objects.filter(status='P')
     serializer_class = RequestSerializer
     permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
 
 
 class DetailBookRequestView(APIView):
-    '''librarian view to get or update user request'''
+    '''Librarian view to get or update user request'''
     permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     def get_object(self, pk):
-        '''returns requested pending request object if available'''
+        '''Returns requested pending request object if available'''
         try:
             return PendingRequest.objects.get(pk=pk)
         except PendingRequest.DoesNotExist:
@@ -119,7 +119,7 @@ class DetailBookRequestView(APIView):
         return Response (serializer.data)
 
     def put(self, request, pk, format=None):
-        '''update the request status from Pending to Approved or Rejected.'''
+        '''Update the request status from Pending to Approved or Rejected.'''
         req = self.get_object(pk)
 
         request.data['requested_book'] = req.requested_book.id
@@ -138,12 +138,12 @@ class DetailBookRequestView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ReturnBookView(APIView):
-    '''user view to initiate a return request.'''
+    '''User view to initiate a return request.'''
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     def get_object(self, pk):
-        '''return specific request object if available'''
+        '''Return specific request object if available'''
         try:
             return PendingRequest.objects.get(pk=pk)
         except PendingRequest.DoesNotExist:
@@ -166,7 +166,7 @@ class ReturnBookView(APIView):
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(
-            {'message': "the user is not authorized"},
+            {'message': 'the user is not authorized'},
             status=status.HTTP_405_METHOD_NOT_ALLOWED
             )
 
@@ -176,7 +176,7 @@ class CloseBookRequest(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get_object(self, pk):
-        '''return requested request object if available'''
+        '''Return requested request object if available'''
         try:
             return PendingRequest.objects.get(pk=pk)
         except PendingRequest.DoesNotExist:
@@ -202,6 +202,6 @@ class CloseBookRequest(APIView):
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(
-            {"message": "user has not opened a closed request"},
+            {'message': 'User has not opened a closed request'},
             status=status.HTTP_406_NOT_ACCEPTABLE
             )

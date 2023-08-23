@@ -8,92 +8,101 @@ from rest_framework.response import Response
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.decorators import action
 
-from home.serializers import BookSerializer, RequestSerializer
+from home.serializers import BookSerializer, RequestSerializer, UserBookRequestSerializer
 from home.models import Book, PendingRequest
 from userapp.permissions import LibrarianAuthenticatedOrReadOnly, IsLibrarianAuthenticated
 
 
 class BookViewSet(viewsets.ModelViewSet):
-    '''CRUD operations for Books, user role has read only access.'''
+    '''
+    CRUD operations for Books. 
+    User role has read only access.
+    '''
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [LibrarianAuthenticatedOrReadOnly]
     authentication_classes = [JWTAuthentication]
 
-class GetBookByNameOrAuthor(generics.ListAPIView):
-    '''To search books by Book name or Author name.'''
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
+    def list(self, request):
+        '''
+        Search books by Book name or Author name.
+        No authentication required.
+        '''
+        name = request.query_params.get('name')
 
-    def get_queryset(self):
-        name = self.kwargs.get('name')
-        return Book.objects.filter(Q(name__icontains=name) | Q(author_name__icontains=name))
+        if name:
+            books = Book.objects.filter(Q(name__icontains=name) | Q(author_name__icontains=name))
+            serializer = BookSerializer(books, many=True)
+            return Response(serializer.data)
+        else:
+            books = Book.objects.all()
+            serializer = BookSerializer(books, many=True)
+            return Response({
+                "message": "No search parameters were provided",
+                "data":serializer.data
+            })
+
 
 class UserBookRequestView(APIView):
-    '''List view of requests of a user'''
+    '''View of requests of the logged in user'''
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     def get(self, request):
-        '''To get a user's issued books, pending request books and returned books.'''
-        try:
-            issued_books = PendingRequest.objects.filter(
-                Q(request_user=request.user) & Q(status='A')
-                )
-            books_issued = []
+        '''
+        Authenticated user can view all his issued, requested and returned books.
+        '''
+        issued_books = PendingRequest.objects.filter(
+            request_user=request.user, status='A'
+        ).values_list('requested_book__name', flat=True)
 
-            for book in issued_books:
-                books_issued.append(book.requested_book.name)
+        requested_books = PendingRequest.objects.filter(
+            request_user=request.user, status='P'
+        ).values_list('requested_book__name', flat=True)
 
-            requested_books = PendingRequest.objects.filter(
-                Q(request_user = request.user) & Q(status='P')
-                )
-            books_requested = []
+        returned_books = PendingRequest.objects.filter(
+            Q(request_user=request.user, status='C') |
+            Q(request_user=request.user, status='B')
+        ).values_list('requested_book__name', flat=True)
 
-            for book in requested_books:
-                books_requested.append(book.requested_book.name)
+        data = {
+            'issued_books': issued_books,
+            'requested_books': requested_books,
+            'returned_books': returned_books
+        }
 
-            returned_books = PendingRequest.objects.filter(
-                Q(request_user=request.user) & (Q(status='C') | Q(status='B'))
-                )
-            books_returned = []
-
-            for book in returned_books:
-                books_returned.append(book.requested_book.name)
-
-            return Response({
-                    'status': True,
-                    'message': 'success data',
-                    'data': {
-                        'books': {
-                            'issued books': books_issued,
-                            'requested books': books_requested,
-                            'returned books' : books_returned
-                            }
-                        }
-            }, status= status.HTTP_200_OK)
-
-        except Exception as error:
-            print(error)
-            return Response({
-                'status': False,
-                'message': 'something went wrong!'
-            })
+        serializer = UserBookRequestSerializer(data)
+        return Response({
+            'status': True,
+            'message': 'success data',
+            'data': {
+                'books': serializer.data
+            }
+        }, status=status.HTTP_200_OK)
 
     def post(self, request):
-        '''Authenticated user to create a new pending request.'''
+        '''Authenticated user to create a new pending request for a book.'''
+        try:
+            Book.objects.get(pk=data['requested_book'])
+        except Book.DoesNotExist:
+            raise Http404
+
         data = request.data
         data['status'] = 'P'
         data['request_user'] = request.user.id
         serializer = RequestSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 class ListBookRequestView(generics.ListAPIView):
-    '''All the pending requests list view'''
+    '''
+    All the pending requests list view
+    Only for Librarian/Admin
+    '''
     queryset = PendingRequest.objects.filter(status='P')
     serializer_class = RequestSerializer
     permission_classes = [IsLibrarianAuthenticated]
@@ -107,43 +116,53 @@ class DetailBookRequestView(APIView):
 
     def get_object(self, pk):
         '''Returns requested pending request object if available'''
+
         try:
             return PendingRequest.objects.get(pk=pk)
         except PendingRequest.DoesNotExist:
             raise Http404
 
     def get(self, request, pk, format=None):
-        '''To get a specific user request.'''
+        '''
+        To get a specific user request
+        by passing in the primary key.
+        '''
         req = self.get_object(pk)
         serializer = RequestSerializer(req)
         return Response (serializer.data)
 
     def put(self, request, pk, format=None):
-        '''Update the request status from Pending to Approved or Rejected.'''
+        '''
+        Update the request status from Pending to Approved or Rejected.
+        Permissions are only for librarian/admin.
+        '''
         req = self.get_object(pk)
-
         request.data['requested_book'] = req.requested_book.id
         serializer = RequestSerializer(req, data=request.data)
-        if serializer.is_valid():
-            instance = serializer.save()
-            if request.data['status'] == 'A':
-                try:
-                    book = Book.objects.get(pk=instance.requested_book.id)
-                    book.number_of_books -= 1
-                    book.save()
-                except Exception as error:
-                    print(error)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
 
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if request.data['status'] == 'A':
 
-class ReturnBookView(APIView):
-    '''User view to initiate a return request.'''
+            try:
+                instance.requested_book.number_of_books -= 1
+                instance.requested_book.save()
+            except Exception as error:
+                print(error)
+
+        return Response(serializer.data)
+
+class UserReturnBookView(APIView):
+    '''
+    User view to initiate a return request.
+    Uver can only request to return its own request.
+    '''
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     def get_object(self, pk):
         '''Return specific request object if available'''
+
         try:
             return PendingRequest.objects.get(pk=pk)
         except PendingRequest.DoesNotExist:
@@ -158,25 +177,29 @@ class ReturnBookView(APIView):
         request.data['requested_book'] = req.requested_book.id
         serializer = RequestSerializer(req, data=request.data)
 
-        if req.request_user == request.user:
+        if req.request_user == request.user and req.status == 'A':
             request.data['status'] = 'B'
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
 
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(
-            {'message': 'the user is not authorized'},
+            {'message': 'the user is not authorized or request is currently not approved.'},
             status=status.HTTP_405_METHOD_NOT_ALLOWED
             )
 
+
 class CloseBookRequest(APIView):
-    '''Librarian view to close a return book request.'''
+    '''
+    Librarian view to close a return book request.
+    Exclusive to librarian/admin only.
+    '''
     permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     def get_object(self, pk):
         '''Return requested request object if available'''
+
         try:
             return PendingRequest.objects.get(pk=pk)
         except PendingRequest.DoesNotExist:
@@ -188,20 +211,19 @@ class CloseBookRequest(APIView):
         serializer = RequestSerializer(req, data=request.data)
 
         if req.status == 'B':
-            if serializer.is_valid():
-                instance = serializer.save()
+            serializer.is_valid(raise_exception=True)
+            instance = serializer.save()
 
-                if request.data['status'] == 'C':
-                    try:
-                        book = Book.objects.get(pk=instance.requested_book.id)
-                        book.number_of_books += 1
-                        book.save()
-                    except Exception as error:
-                        print(error)
+            if request.data['status'] == 'C':
 
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                try:
+                    instance.requested_book.number_of_books +=1
+                    instance.requested_book.save()
+                except Exception as error:
+                    print(error)
+
+            return Response(serializer.data)
         return Response(
             {'message': 'User has not opened a closed request'},
             status=status.HTTP_406_NOT_ACCEPTABLE
-            )
+        )

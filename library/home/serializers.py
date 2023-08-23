@@ -40,3 +40,8 @@ class RequestSerializer(serializers.ModelSerializer):
             if not request_book.number_of_books > 0:
                 raise serializers.ValidationError('No copies of the book are available.')
         return data
+
+class UserBookRequestSerializer(serializers.Serializer):
+    issued_books = serializers.ListField(child=serializers.CharField())
+    requested_books = serializers.ListField(child=serializers.CharField())
+    returned_books = serializers.ListField(child=serializers.CharField())

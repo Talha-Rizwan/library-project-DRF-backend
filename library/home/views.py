@@ -1,14 +1,12 @@
-'''views of all the home class requests on url api/'''
+'''Views of all the home class requests on url api/'''
 from django.db.models import Q
 from django.http import Http404
 
-from rest_framework import generics
+from rest_framework import generics, status, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.decorators import action
 
 from home.serializers import BookSerializer, RequestSerializer, UserBookRequestSerializer
 from home.models import Book, PendingRequest
@@ -36,13 +34,13 @@ class BookViewSet(viewsets.ModelViewSet):
             books = Book.objects.filter(Q(name__icontains=name) | Q(author_name__icontains=name))
             serializer = BookSerializer(books, many=True)
             return Response(serializer.data)
-        else:
-            books = Book.objects.all()
-            serializer = BookSerializer(books, many=True)
-            return Response({
-                "message": "No search parameters were provided",
-                "data":serializer.data
-            })
+
+        books = Book.objects.all()
+        serializer = BookSerializer(books, many=True)
+        return Response({
+            "message": "No search parameters were provided",
+            "data":serializer.data
+        })
 
 
 class UserBookRequestView(APIView):
@@ -152,6 +150,7 @@ class DetailBookRequestView(APIView):
 
         return Response(serializer.data)
 
+
 class UserReturnBookView(APIView):
     '''
     User view to initiate a return request.
@@ -186,7 +185,7 @@ class UserReturnBookView(APIView):
         return Response(
             {'message': 'the user is not authorized or request is currently not approved.'},
             status=status.HTTP_405_METHOD_NOT_ALLOWED
-            )
+        )
 
 
 class CloseBookRequest(APIView):

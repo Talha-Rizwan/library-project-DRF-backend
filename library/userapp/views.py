@@ -1,9 +1,7 @@
 '''Views of all the userapp class requests on url api/user/'''
 from django.contrib.auth.hashers import make_password
-from django.db.utils import IntegrityError
 
 from rest_framework import generics
-from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -40,13 +38,13 @@ class UserProfileView(APIView):
             'message': 'your account is created'
         }, status=status.HTTP_201_CREATED)
 
-        
+
     def put(self, request):
         '''
         To update user profile details.
         User must be logged in and can only update their own profile.
         '''
-        
+
         user = request.user
         data = request.data
         data.pop('username', None)

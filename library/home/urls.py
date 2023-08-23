@@ -8,7 +8,6 @@ from home import views
 router = DefaultRouter()
 router.register(r'book-view-set', views.BookViewSet, basename='book')
 
-
 urlpatterns = [
     path('user-request/', views.UserBookRequestView.as_view(), name='pending-request'),
     path('all-request/', views.ListBookRequestView.as_view(), name='all-request'),

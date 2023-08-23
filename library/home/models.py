@@ -25,4 +25,5 @@ class PendingRequest(models.Model):
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, null=False, default='P')
 
     def __str__(self):
-        return f'Request from {self.request_user.full_name} for {self.requested_book.name} - {self.status}'
+        return (f'Request from {self.request_user.full_name} for ' +
+                f'{self.requested_book.name} - {self.status}')

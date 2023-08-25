@@ -3,8 +3,7 @@ from django.contrib.auth.models import Permission
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from home.serializers import RequestSerializer
-from home.tests.factories import UserBookRequestFactory, BookFactory
+from home.tests.factories import UserBookRequestFactory
 from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
 

@@ -83,7 +83,7 @@ class UserBookRequestView(APIView):
     def post(self, request):
         '''Authenticated user to create a new pending request for a book.'''
         try:
-            Book.objects.get(pk=data['requested_book'])
+            Book.objects.get(pk=request.data['requested_book'])
         except Book.DoesNotExist:
             raise Http404
 

@@ -46,4 +46,46 @@ class BookViewSetTestCase(APITestCase):
         response = self.client.post(url, data=book_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    
+    def test_retrieve_book(self):
+        url = '/api/home/book-view-set/1/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_book(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        updated_data = {
+            "name": "Updated Book Name",
+            "author_name": "Virginia Woolf",
+            "publisher_name": "Hogarth Press",
+            "number_of_books": 10,
+        }
+        url = '/api/home/book-view-set/1/' 
+        response = self.client.put(url, data=updated_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # self.books.refresh_from_db()
+        self.assertEqual(response.data["name"], 'Updated Book Name')
+        self.assertEqual(response.data['number_of_books'], 10)
+
+    def test_delete_book(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        url = '/api/home/book-view-set/1/' 
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Book.objects.filter(id=1).exists())
+
+    def test_search_books(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        book_data = {
+            "name": "Test Search",
+            "author_name": "C.S. Lewis",
+            "publisher_name": "HarperCollins",
+            "number_of_books": 10,
+        }
+        url = '/api/home/book-view-set/'
+        response = self.client.post(url, data=book_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        url = '/api/home/book-view-set/' + '?name=Test'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        names = [item['name'] for item in response.data]
+        self.assertTrue('Test Search' in names)

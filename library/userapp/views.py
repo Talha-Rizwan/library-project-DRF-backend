@@ -44,20 +44,25 @@ class UserProfileView(APIView):
         To update user profile details.
         User must be logged in and can only update their own profile.
         '''
+        try:
+            user = request.user
+            data = request.data
+            data.pop('username', None)
+            data.pop('password', None)
+            serializer = UserSerializer(user, data=data, partial=True)
 
-        user = request.user
-        data = request.data
-        data.pop('username', None)
-        data.pop('password', None)
-        serializer = UserSerializer(user, data=data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
 
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response({
-            'data': {},
-            'message': 'Your profile has been updated'
-        }, status=status.HTTP_200_OK)
+            return Response({
+                'data': {},
+                'message': 'Your profile has been updated'
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                'data': {},
+                'message': 'Unauthenticated user'
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class LoginView(APIView):

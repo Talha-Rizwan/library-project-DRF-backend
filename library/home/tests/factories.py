@@ -1,11 +1,11 @@
-import factory
+from factory import django, Faker
 from home.models import Book
 
-class BookFactory(factory.Factory):
+class BookFactory(django.DjangoModelFactory):
     class Meta:
         model = Book
 
-    name = factory.Faker('text', max_nb_chars=50)
-    author_name = factory.Faker('name')
-    publisher_name = factory.Faker('company')
-    number_of_books = factory.Faker('random_int', min=1, max=100)
+    name = Faker('text', max_nb_chars=50)
+    author_name = Faker('name')
+    publisher_name = Faker('company')
+    number_of_books = Faker('random_int', min=1, max=100)

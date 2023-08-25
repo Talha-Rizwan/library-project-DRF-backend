@@ -1,10 +1,7 @@
-
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from home.serializers import RequestSerializer
 from home.tests.factories import UserBookRequestFactory, BookFactory
-from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
 
 class UserRequestTestCase(APITestCase):
@@ -66,12 +63,10 @@ class UserRequestTestCase(APITestCase):
 
     def test_get_requests(self):
         response = self.client.get(self.url)
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['data']['books']['requested_books'][0], self.Requests.requested_book.name)
 
     def test_get_unauthorized_requests(self):
         self.client.credentials()
         response = self.client.get(self.url)
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

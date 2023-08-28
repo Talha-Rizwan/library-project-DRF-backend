@@ -1,7 +1,13 @@
+'''Factory classes to create instances of models in home application.'''
 from factory import django, Faker, SubFactory
 from home.models import Book, PendingRequest
 from userapp.tests.factories import UserFactory
+
 class BookFactory(django.DjangoModelFactory):
+    '''
+    BookFactory class to create instances of Book model
+    with ramdom values fulfilling the criteria.
+    '''
     class Meta:
         model = Book
 
@@ -11,6 +17,12 @@ class BookFactory(django.DjangoModelFactory):
     number_of_books = Faker('random_int', min=1, max=100)
 
 class UserBookRequestFactory(django.DjangoModelFactory):
+    '''
+    Class to create instances of PendingRequest model in the home application
+    The default status is always pending.
+    It creates user and books using the UserFactory and BookFactory
+    as SubFactories to fill the required fields.
+    '''
     class Meta:
         model = PendingRequest
     status = 'P'

@@ -1,3 +1,5 @@
+'''Tests to get all user pending request by librarian user.'''
+
 from django.contrib.auth.models import Permission
 
 from rest_framework import status
@@ -8,8 +10,14 @@ from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
 
 class LibrarianListRequestTestCase(APITestCase):
+    '''Class to evaluate all the scenarios of ListBookRequestView'''
 
     def setUp(self):
+        '''
+        Create different Requests with status pending.
+        Creating simple and librarian user.
+        Getting the jwt authentication token for librarian user.
+        '''
         self.Requests = UserBookRequestFactory.create_batch(10) # To Do use batch size as a constant here
         self.url = '/api/home/all-request/'
         self.customer_user = UserFactory()
@@ -27,23 +35,24 @@ class LibrarianListRequestTestCase(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
     def test_get_all_requests(self):
+        '''Test to get all the pending user requests by librarian user'''
         response = self.client.get(self.url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 10)
     
     def test_get_all_requests_without_authentication(self):
+        '''Test to get all reqests using anonymous user.'''
         self.client.credentials()
         response = self.client.get(self.url, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_all_requests_with_simple_user(self):
+        '''Test to get all user requests using simple user account.'''
         data = {
             "username": self.customer_user.username,
             "password": 'password123'
         }
         token = get_jwt_token(data)['data']['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
-
         response = self.client.get(self.url, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-

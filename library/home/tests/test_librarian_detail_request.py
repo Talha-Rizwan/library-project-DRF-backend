@@ -1,16 +1,22 @@
+'''Tests to get or approve/reject user pending request.'''
 from django.contrib.auth.models import Permission
 
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from home.serializers import RequestSerializer
-from home.tests.factories import UserBookRequestFactory, BookFactory
+from home.tests.factories import UserBookRequestFactory
 from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
 
 class LibrarianDetailRequestTestCase(APITestCase):
+    '''Test class to check all the scenarios of DetailBookRequestView'''
 
     def setUp(self):
+        '''
+        Create different Requests with status pending.
+        Creating simple and librarian user.
+        Getting the jwt authentication token for librarian user.
+        '''
         self.Requests = UserBookRequestFactory.create_batch(10) # To Do use batch size as a constant here
         self.url = '/api/home/request/'
         self.customer_user = UserFactory()
@@ -27,21 +33,25 @@ class LibrarianDetailRequestTestCase(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
     def test_get_request(self):
+        '''Test to get a request using its id by a librarian user.'''
         response = self.client.get(f'{self.url}{self.Requests[0].id}/', format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['requested_book'], self.Requests[0].requested_book.id)
 
     def test_get_request_with_wrong_id(self):
+        '''Test to get request that doesnot exist.'''
         response = self.client.get(f'{self.url}{1000}/', format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data['detail'], 'Not found.')
 
     def test_get_request_unauthorized(self):
+        '''Test to get a request without authentication.'''
         self.client.credentials()
         response = self.client.get(f'{self.url}{self.Requests[0].id}/', format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_request_simple_user(self):
+        '''Test to get a request with a simple user account.'''
         data = {
             "username": self.customer_user.username,
             "password": 'password123'
@@ -53,29 +63,35 @@ class LibrarianDetailRequestTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_librarian_approve_request(self):
+        '''Test to approve a user request by a librarian via id.'''
         response = self.client.put(f'{self.url}{self.Requests[0].id}/',data={"status": "A"}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['status'], 'A')
 
     def test_librarian_unauthorized_approve_request(self):
+        '''Test to approve a request using ananymous user.'''
         self.client.credentials()
         response = self.client.put(f'{self.url}{self.Requests[0].id}/',data={"status": "A"}, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_librarian_reject_request(self):
+        '''Test to reject a user request by a librarian via id.'''
         response = self.client.put(f'{self.url}{self.Requests[0].id}/',data={"status": "R"}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['status'], 'R')
     
     def test_librarian_unauthorized_reject_request(self):
+        '''Test to reject a user request by a simple user via id.'''
         self.client.credentials()
         response = self.client.put(f'{self.url}{self.Requests[0].id}/',data={"status": "R"}, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_update_request_with_wrong_input(self):
+        '''Test to send wrong input in the request body.'''
         response = self.client.put(f'{self.url}{self.Requests[0].id}/',data={"status": "Incorrect"}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_librarain_non_existant_request(self):
+        '''Test to update a request that doesnot exist.'''
         response = self.client.put(f'{self.url}100/',data={"status": "R"}, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

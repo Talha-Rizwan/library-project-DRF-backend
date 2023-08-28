@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from userapp.serializers import UserLoginSerializer, UserSerializer, UserRoleSerializer
+from userapp.serializers import UserLoginSerializer, UserSerializer
 from userapp.models import User
 from userapp.permissions import IsLibrarianAuthenticated, IsAdminAuthenticated
 from userapp.utlis import get_jwt_token
@@ -75,25 +75,3 @@ class LoginView(APIView):
         response = get_jwt_token(serializer.data)
 
         return Response(response, status=status.HTTP_200_OK)
-
-
-class UserRoleListView(generics.ListAPIView):
-    '''
-    For getting all the users available with roles. 
-    permission only for librarian/admin
-    '''
-    queryset = User.objects.all()
-    serializer_class = UserRoleSerializer
-    permission_classes = [IsLibrarianAuthenticated]
-    authentication_classes = [JWTAuthentication]
-
-class LibrarianRoleDetailView(generics.RetrieveUpdateAPIView):
-    '''
-    Detail view of user with role via id
-    Only permission for admin.
-    Admin can update a user role to librarian py its id.
-    '''
-    queryset = User.objects.all()
-    serializer_class = UserRoleSerializer
-    permission_classes = [ IsAdminAuthenticated]
-    authentication_classes = [JWTAuthentication]

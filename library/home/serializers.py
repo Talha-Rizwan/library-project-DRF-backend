@@ -24,7 +24,7 @@ class RequestSerializer(serializers.ModelSerializer):
         PendingRequest and includes all fields
         '''
         model = PendingRequest
-        fields = ['request_user', 'requested_book', 'created', 'status']
+        fields = ['id', 'request_user', 'requested_book', 'created', 'status']
 
     def validate(self, attrs):
         '''
@@ -36,8 +36,9 @@ class RequestSerializer(serializers.ModelSerializer):
         request_user = attrs.get('request_user')
         request_book = attrs.get('requested_book')
         if is_creation:
-            if len(PendingRequest.objects.filter(
-                Q(request_user=request_user) & Q(status='A'))) >=3:
+            if PendingRequest.objects.filter(
+                Q(request_user=request_user) & Q(status='A')
+            ).count() >=3:
                 raise serializers.ValidationError('The user already has 3 or more issued books.')
             if not request_book.number_of_books > 0:
                 raise serializers.ValidationError('No copies of the book are available.')

@@ -22,11 +22,3 @@ class UserLoginSerializer(serializers.Serializer):
         if not User.objects.filter(username = data['username']).exists():
             raise serializers.ValidationError('account do not exist')
         return data
-
-# pylint: disable=R0903
-class UserRoleSerializer(serializers.ModelSerializer):
-    '''User serializer specific for user role functionality'''
-    class Meta:
-        '''The model class associated with this serializer is User and includes certain fields'''
-        model = User
-        fields = ['id', 'username', 'role']

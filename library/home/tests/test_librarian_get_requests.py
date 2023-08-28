@@ -19,7 +19,7 @@ class LibrarianListRequestTestCase(APITestCase):
         Creating simple and librarian user.
         Getting the jwt authentication token for librarian user.
         '''
-        self.Requests = UserBookRequestFactory.create_batch(BATCH_SIZE) # To Do use batch size as a constant here
+        self.Requests = UserBookRequestFactory.create_batch(BATCH_SIZE)
         self.url = '/api/home/all-request/'
         self.customer_user = UserFactory()
         self.librarian_user = UserFactory()

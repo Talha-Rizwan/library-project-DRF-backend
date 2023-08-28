@@ -34,7 +34,7 @@ class UserProfileViewTest(APITestCase):
         '''Test to create a user profile without username(required).'''
         serializer = UserSerializer(UserFactory.build())
         data =  serializer.data
-        del data['username']        
+        del data['username']
         response = self.client.post(self.url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 

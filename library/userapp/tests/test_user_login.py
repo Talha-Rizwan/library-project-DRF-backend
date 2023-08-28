@@ -9,7 +9,7 @@ class UserLoginProfileViewTest(APITestCase):
     def setUp(self):
         self.url = '/api/user/login/'
         self.user = UserFactory()
-       
+
 
     def test_login_user(self):
         '''Test to login a user using the correct credentials.'''

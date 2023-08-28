@@ -9,6 +9,7 @@ class BookFactory(django.DjangoModelFactory):
     with ramdom values fulfilling the criteria.
     '''
     class Meta:
+        '''Using the model Book for this class.'''
         model = Book
 
     name = Faker('text', max_nb_chars=50)
@@ -24,8 +25,8 @@ class UserBookRequestFactory(django.DjangoModelFactory):
     as SubFactories to fill the required fields.
     '''
     class Meta:
+        '''Using the model PendingRequest for this factory class.'''
         model = PendingRequest
     status = 'P'
     requested_book = SubFactory(BookFactory)
     request_user = SubFactory(UserFactory)
-    

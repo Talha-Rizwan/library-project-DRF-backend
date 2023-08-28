@@ -7,9 +7,9 @@ from rest_framework.test import APITestCase
 from home.serializers import BookSerializer
 from home.tests.factories import BookFactory
 from home.models import Book
+from home.tests.constants import BATCH_SIZE, FORMAT
 from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
-from home.tests.constants import BATCH_SIZE, FORMAT
 
 class BookViewSetTestCase(APITestCase):
     '''Class to test the View of BookViewSet using the url api/home/book-view-set/'''
@@ -19,14 +19,14 @@ class BookViewSetTestCase(APITestCase):
         crete a simple user and a user with is_librarian permission.
         send credentials and get jwt token to make requests.
         '''
-        self.books = BookFactory.create_batch(BATCH_SIZE) 
+        self.books = BookFactory.create_batch(BATCH_SIZE)
         self.customer_user = UserFactory()
         self.librarian_user = UserFactory()
         self.url = '/api/home/book-view-set/'
         librarian = Permission.objects.get(codename='is_librarian')
         self.librarian_user.user_permissions.add(librarian)
         self.librarian_user.save()
-  
+
         data = {
             "username": self.librarian_user.username,
             "password": 'password123'
@@ -34,7 +34,6 @@ class BookViewSetTestCase(APITestCase):
         token = get_jwt_token(data)['data']['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
-        
     def test_list_books(self):
         '''Test to list all books by anonyous user'''
         self.client.credentials()
@@ -42,16 +41,14 @@ class BookViewSetTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["data"]), BATCH_SIZE)
 
-
     def test_create_book(self):
         '''Test to crete new book using librarian user.'''
         serializer = BookSerializer(BookFactory.build())
         data = serializer.data
         del data['cover_image']
-        response = self.client.post(self.url, data=data, format=FORMAT)        
+        response = self.client.post(self.url, data=data, format=FORMAT)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['name'], data['name'])
-
 
     def test_create_book_without_credentials(self):
         '''Test to create book using an anonymous user.'''
@@ -59,9 +56,8 @@ class BookViewSetTestCase(APITestCase):
         serializer = BookSerializer(BookFactory.build())
         data = serializer.data
         del data['cover_image']
-        response = self.client.post(self.url, data=data, format=FORMAT)        
+        response = self.client.post(self.url, data=data, format=FORMAT)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
 
     def test_create_book_with_customer_user(self):
         '''Test to create user with customer user.'''
@@ -74,9 +70,8 @@ class BookViewSetTestCase(APITestCase):
         serializer = BookSerializer(BookFactory.build())
         data = serializer.data
         del data['cover_image']
-        response = self.client.post(self.url, data=data, format=FORMAT)        
+        response = self.client.post(self.url, data=data, format=FORMAT)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
 
     def test_retrieve_book(self):
         '''Test to get a book by passing book id using anonymous user.'''

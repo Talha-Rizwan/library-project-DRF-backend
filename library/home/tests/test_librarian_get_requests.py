@@ -6,28 +6,27 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from home.tests.factories import UserBookRequestFactory
+from home.tests.constants import BATCH_SIZE, FORMAT
 from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
-from home.tests.constants import BATCH_SIZE, FORMAT
 
 class LibrarianListRequestTestCase(APITestCase):
     '''Class to evaluate all the scenarios of ListBookRequestView'''
 
     def setUp(self):
         '''
-        Create different Requests with status pending.
+        Create different requests with status pending.
         Creating simple and librarian user.
         Getting the jwt authentication token for librarian user.
         '''
-        self.Requests = UserBookRequestFactory.create_batch(BATCH_SIZE)
+        self.requests = UserBookRequestFactory.create_batch(BATCH_SIZE)
         self.url = '/api/home/all-request/'
         self.customer_user = UserFactory()
         self.librarian_user = UserFactory()
         librarian = Permission.objects.get(codename='is_librarian')
         self.librarian_user.user_permissions.add(librarian)
         self.librarian_user.save()
-  
-  
+
         data = {
             "username": self.librarian_user.username,
             "password": 'password123'
@@ -40,7 +39,7 @@ class LibrarianListRequestTestCase(APITestCase):
         response = self.client.get(self.url, format=FORMAT)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), BATCH_SIZE)
-    
+
     def test_get_all_requests_without_authentication(self):
         '''Test to get all reqests using anonymous user.'''
         self.client.credentials()

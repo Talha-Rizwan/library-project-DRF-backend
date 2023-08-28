@@ -9,6 +9,7 @@ from home.tests.factories import BookFactory
 from home.models import Book
 from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
+from home.tests.constants import BATCH_SIZE, FORMAT
 
 class BookViewSetTestCase(APITestCase):
     '''Class to test the View of BookViewSet using the url api/home/book-view-set/'''
@@ -18,7 +19,7 @@ class BookViewSetTestCase(APITestCase):
         crete a simple user and a user with is_librarian permission.
         send credentials and get jwt token to make requests.
         '''
-        self.books = BookFactory.create_batch(10)
+        self.books = BookFactory.create_batch(BATCH_SIZE) 
         self.customer_user = UserFactory()
         self.librarian_user = UserFactory()
         self.url = '/api/home/book-view-set/'
@@ -39,7 +40,7 @@ class BookViewSetTestCase(APITestCase):
         self.client.credentials()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["data"]), 10)
+        self.assertEqual(len(response.data["data"]), BATCH_SIZE)
 
 
     def test_create_book(self):
@@ -47,7 +48,7 @@ class BookViewSetTestCase(APITestCase):
         serializer = BookSerializer(BookFactory.build())
         data = serializer.data
         del data['cover_image']
-        response = self.client.post(self.url, data=data, format='json')        
+        response = self.client.post(self.url, data=data, format=FORMAT)        
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['name'], data['name'])
 
@@ -58,7 +59,7 @@ class BookViewSetTestCase(APITestCase):
         serializer = BookSerializer(BookFactory.build())
         data = serializer.data
         del data['cover_image']
-        response = self.client.post(self.url, data=data, format='json')        
+        response = self.client.post(self.url, data=data, format=FORMAT)        
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
@@ -73,7 +74,7 @@ class BookViewSetTestCase(APITestCase):
         serializer = BookSerializer(BookFactory.build())
         data = serializer.data
         del data['cover_image']
-        response = self.client.post(self.url, data=data, format='json')        
+        response = self.client.post(self.url, data=data, format=FORMAT)        
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
@@ -98,7 +99,7 @@ class BookViewSetTestCase(APITestCase):
         data['name'] = "Updated Book Name"
         data["number_of_books"] = 10
         del data['cover_image']
-        response = self.client.put(f'{self.url}{self.books[0].id}/', data=data, format='json')
+        response = self.client.put(f'{self.url}{self.books[0].id}/', data=data, format=FORMAT)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["name"], 'Updated Book Name')
         self.assertEqual(response.data['number_of_books'], 10)
@@ -111,7 +112,7 @@ class BookViewSetTestCase(APITestCase):
         data['name'] = "Updated Book Name"
         data["number_of_books"] = 10
         del data['cover_image']
-        response = self.client.put(f'{self.url}100/', data=data, format='json')
+        response = self.client.put(f'{self.url}100/', data=data, format=FORMAT)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
@@ -148,4 +149,4 @@ class BookViewSetTestCase(APITestCase):
         url = f'{self.url}?wrong={self.books[0].name}'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['data']), 10)
+        self.assertEqual(len(response.data['data']), BATCH_SIZE)

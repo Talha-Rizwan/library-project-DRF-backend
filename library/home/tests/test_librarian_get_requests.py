@@ -8,6 +8,7 @@ from rest_framework.test import APITestCase
 from home.tests.factories import UserBookRequestFactory
 from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
+from home.tests.constants import BATCH_SIZE, FORMAT
 
 class LibrarianListRequestTestCase(APITestCase):
     '''Class to evaluate all the scenarios of ListBookRequestView'''
@@ -18,7 +19,7 @@ class LibrarianListRequestTestCase(APITestCase):
         Creating simple and librarian user.
         Getting the jwt authentication token for librarian user.
         '''
-        self.Requests = UserBookRequestFactory.create_batch(10) # To Do use batch size as a constant here
+        self.Requests = UserBookRequestFactory.create_batch(BATCH_SIZE) # To Do use batch size as a constant here
         self.url = '/api/home/all-request/'
         self.customer_user = UserFactory()
         self.librarian_user = UserFactory()
@@ -36,14 +37,14 @@ class LibrarianListRequestTestCase(APITestCase):
 
     def test_get_all_requests(self):
         '''Test to get all the pending user requests by librarian user'''
-        response = self.client.get(self.url, format='json')
+        response = self.client.get(self.url, format=FORMAT)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 10)
+        self.assertEqual(len(response.data), BATCH_SIZE)
     
     def test_get_all_requests_without_authentication(self):
         '''Test to get all reqests using anonymous user.'''
         self.client.credentials()
-        response = self.client.get(self.url, format='json')
+        response = self.client.get(self.url, format=FORMAT)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_all_requests_with_simple_user(self):
@@ -54,5 +55,5 @@ class LibrarianListRequestTestCase(APITestCase):
         }
         token = get_jwt_token(data)['data']['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
-        response = self.client.get(self.url, format='json')
+        response = self.client.get(self.url, format=FORMAT)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

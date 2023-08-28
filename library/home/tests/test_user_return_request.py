@@ -5,6 +5,7 @@ from rest_framework.test import APITestCase
 from home.tests.factories import UserBookRequestFactory
 from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
+from home.tests.constants import FORMAT
 
 class UserReturnRequestTestCase(APITestCase):
     '''Class to evaluate all the scenarios of UserReturnBookView'''
@@ -27,11 +28,10 @@ class UserReturnRequestTestCase(APITestCase):
         }
         token = get_jwt_token(data)['data']['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
-
         
     def test_request_to_close_by_user_owner(self):
         '''Test to change status of request to B by the owner account.'''
-        response = self.client.put(f'{self.url}{self.Requests.id}/',data={"status": "B"}, format='json')
+        response = self.client.put(f'{self.url}{self.Requests.id}/',data={"status": "B"}, format=FORMAT)
         self.assertEqual(response.status_code,status.HTTP_200_OK)
         self.assertEqual(response.data['status'], 'B')
     
@@ -46,20 +46,20 @@ class UserReturnRequestTestCase(APITestCase):
         token = get_jwt_token(data)['data']['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
-        response = self.client.put(f'{self.url}{self.Requests.id}/',data={"status": "B"}, format='json')
+        response = self.client.put(f'{self.url}{self.Requests.id}/',data={"status": "B"}, format=FORMAT)
         self.assertEqual(response.status_code,status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertEqual(response.data['message'], "the user is not authorized or request is currently not approved." )
 
     def test_request_to_close_by_anonymous_user(self):
         '''Test to change status of request to B by anonymous user.'''
         self.client.credentials()
-        response = self.client.put(f'{self.url}{self.Requests.id}/',data={"status": "B"}, format='json')
+        response = self.client.put(f'{self.url}{self.Requests.id}/',data={"status": "B"}, format=FORMAT)
         self.assertEqual(response.status_code,status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.data['detail'], "Authentication credentials were not provided.")
 
     def test_request_not_exist(self):
         '''Test to update status of request that doesnot exist.'''
-        response = self.client.put(f'{self.url}10/',data={"status": "B"}, format='json')
+        response = self.client.put(f'{self.url}10/',data={"status": "B"}, format=FORMAT)
         self.assertEqual(response.status_code,status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data['detail'], "Not found.")
 
@@ -67,6 +67,6 @@ class UserReturnRequestTestCase(APITestCase):
         '''Test to close a request that is not already approved by the librarian.'''
         self.Requests.status = 'P'
         self.Requests.save()
-        response = self.client.put(f'{self.url}{self.Requests.id}/',data={"status": "B"}, format='json')
+        response = self.client.put(f'{self.url}{self.Requests.id}/',data={"status": "B"}, format=FORMAT)
         self.assertEqual(response.status_code,status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertEqual(response.data['message'], "the user is not authorized or request is currently not approved." )

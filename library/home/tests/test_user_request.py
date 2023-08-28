@@ -4,6 +4,7 @@ from rest_framework.test import APITestCase
 
 from home.tests.factories import UserBookRequestFactory, BookFactory
 from userapp.utlis import get_jwt_token
+from home.tests.constants import FORMAT
 
 class UserRequestTestCase(APITestCase):
     '''Class to evaluate all the scenarios of UserBookRequestView.'''
@@ -33,7 +34,7 @@ class UserRequestTestCase(APITestCase):
             "requested_book" : new_book.id
         }
 
-        response = self.client.post(self.url,data=data, format='json')
+        response = self.client.post(self.url,data=data, format=FORMAT)
         self.assertEqual(response.status_code,status.HTTP_201_CREATED)
         self.assertEqual(response.data['request_user'], self.customer_user.id)
         self.assertEqual(response.data['requested_book'], new_book.id)
@@ -44,7 +45,7 @@ class UserRequestTestCase(APITestCase):
             "requested_book" : 10
         }
 
-        response = self.client.post(self.url,data=data, format='json')
+        response = self.client.post(self.url,data=data, format=FORMAT)
         self.assertEqual(response.status_code,status.HTTP_404_NOT_FOUND)
     
     def test_create_request_with_unauthenticated_client(self):
@@ -55,7 +56,7 @@ class UserRequestTestCase(APITestCase):
             "requested_book" : new_book.id
         }
 
-        response = self.client.post(self.url,data=data, format='json')
+        response = self.client.post(self.url,data=data, format=FORMAT)
         self.assertEqual(response.status_code,status.HTTP_401_UNAUTHORIZED)
     
 
@@ -67,7 +68,7 @@ class UserRequestTestCase(APITestCase):
             "status" : "A"
         }
 
-        response = self.client.post(self.url,data=data, format='json')
+        response = self.client.post(self.url,data=data, format=FORMAT)
         self.assertEqual(response.status_code,status.HTTP_201_CREATED)
         self.assertEqual(response.data['status'], "P")
 

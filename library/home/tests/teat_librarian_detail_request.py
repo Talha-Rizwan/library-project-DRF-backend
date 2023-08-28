@@ -31,6 +31,11 @@ class LibrarianDetailRequestTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['requested_book'], self.Requests[0].requested_book.id)
 
+    def test_get_request_with_wrong_id(self):
+        response = self.client.get(f'{self.url}{1000}/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data['detail'], 'Not found.')
+
     def test_get_request_unauthorized(self):
         self.client.credentials()
         response = self.client.get(f'{self.url}{self.Requests[0].id}/', format='json')
@@ -70,3 +75,4 @@ class LibrarianDetailRequestTestCase(APITestCase):
     def test_update_request_with_wrong_input(self):
         response = self.client.put(f'{self.url}{self.Requests[0].id}/',data={"status": "Incorrect"}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+

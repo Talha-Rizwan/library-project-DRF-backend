@@ -24,7 +24,7 @@ class RequestSerializer(serializers.ModelSerializer):
         PendingRequest and includes all fields
         '''
         model = PendingRequest
-        fields = ['request_user', 'requested_book', 'created', 'status']
+        fields = ['id', 'request_user', 'requested_book', 'created', 'status']
 
     def validate(self, attrs):
         '''

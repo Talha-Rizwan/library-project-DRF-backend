@@ -76,3 +76,6 @@ class LibrarianDetailRequestTestCase(APITestCase):
         response = self.client.put(f'{self.url}{self.Requests[0].id}/',data={"status": "Incorrect"}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_librarain_non_existant_request(self):
+        response = self.client.put(f'{self.url}100/',data={"status": "R"}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

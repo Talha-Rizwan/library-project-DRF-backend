@@ -175,10 +175,7 @@ class UserReturnBookView(APIView):
         req = self.get_object(pk)
         request.data['requested_book'] = req.requested_book.id
         serializer = RequestSerializer(req, data=request.data)
-        print('the req.request user is : ', req.request_user)
-        print('the request user is : ', request.user)
-        # print('req.status is ', req.status)
-
+       
         if req.request_user == request.user and req.status == 'A':
             request.data['status'] = 'B'
             

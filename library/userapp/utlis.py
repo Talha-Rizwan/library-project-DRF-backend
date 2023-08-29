@@ -12,10 +12,8 @@ def get_jwt_token(data):
     refresh = RefreshToken.for_user(user)
     return {
         'message': 'login success',
-        'data': {
-            'token':{
-                'refresh': str(refresh),
-                'access': str(refresh.access_token)
-                }
+        'token':{
+            'refresh': str(refresh),
+            'access': str(refresh.access_token)
             }
         }

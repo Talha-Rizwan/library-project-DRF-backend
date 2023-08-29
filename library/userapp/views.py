@@ -1,7 +1,6 @@
 '''Views of all the userapp class requests on url api/user/'''
 from django.contrib.auth.hashers import make_password
 
-from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,8 +8,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from userapp.serializers import UserLoginSerializer, UserSerializer
-from userapp.models import User
-from userapp.permissions import IsLibrarianAuthenticated, IsAdminAuthenticated
 from userapp.utlis import get_jwt_token
 
 
@@ -34,7 +31,6 @@ class UserProfileView(APIView):
         serializer.save()
 
         return Response({
-            'data': {},
             'message': 'your account is created'
         }, status=status.HTTP_201_CREATED)
 
@@ -55,8 +51,7 @@ class UserProfileView(APIView):
         serializer.save()
 
         return Response({
-            'data': {},
-            'message': 'Your profile has been updated'
+            'message': 'Your profile is updated successfully'
         }, status=status.HTTP_200_OK)
 
 

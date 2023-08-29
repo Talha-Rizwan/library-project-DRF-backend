@@ -73,12 +73,8 @@ class UserBookRequestView(APIView):
 
         serializer = UserBookRequestSerializer(data)
         return Response({
-            'status': True,
-            'message': 'success data',
-            'data': {
                 'books': serializer.data
-            }
-        }, status=status.HTTP_200_OK)
+            }, status=status.HTTP_200_OK)
 
     def post(self, request):
         '''Authenticated user to create a new pending request for a book.'''
@@ -134,12 +130,6 @@ class UserReturnBookView(generics.UpdateAPIView):
     serializer_class = RequestSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
-
-    # def get_object(self, pk):
-    #     try:
-    #         return PendingRequest.objects.get(pk=pk)
-    #     except PendingRequest.DoesNotExist:
-    #         raise Http404
 
     def update(self, request, pk, format=None):
         req = self.get_object()

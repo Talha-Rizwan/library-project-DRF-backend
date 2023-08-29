@@ -19,6 +19,8 @@ class UserLoginSerializer(serializers.Serializer):
     def vaildate(self, data):
         '''To validate the user exists or not.'''
 
-        if not User.objects.filter(username = data['username']).exists():
-            raise serializers.ValidationError('account do not exist')
-        return data
+        if User.objects.filter(username = data['username']).exists():
+            return data
+        
+        raise serializers.ValidationError('account do not exist')
+        

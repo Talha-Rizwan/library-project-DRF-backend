@@ -4,9 +4,3 @@ GENDER_CHOICES = (
         ('F', 'Female'),
         ('O', 'Other'),
     )
-
-ROLE_CHOICES = (
-        ('A', 'Admin'),
-        ('L', 'Librarian'),
-        ('C', 'Customer'),
-    )

@@ -135,14 +135,14 @@ class UserReturnBookView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def get_object(self, pk):
-        try:
-            return PendingRequest.objects.get(pk=pk)
-        except PendingRequest.DoesNotExist:
-            raise Http404
+    # def get_object(self, pk):
+    #     try:
+    #         return PendingRequest.objects.get(pk=pk)
+    #     except PendingRequest.DoesNotExist:
+    #         raise Http404
 
     def update(self, request, pk, format=None):
-        req = self.get_object(pk)
+        req = self.get_object()
 
         if req.request_user == request.user and req.status == 'A':
             request.data['status'] = 'B'
@@ -157,25 +157,18 @@ class UserReturnBookView(generics.UpdateAPIView):
         )
 
 
-class CloseBookRequest(APIView):
+class CloseBookRequest(generics.UpdateAPIView):
     '''
     Librarian view to close a return book request.
     Exclusive to librarian/admin only.
     '''
+    queryset = PendingRequest.objects.all()
     permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def get_object(self, pk):
-        '''Return requested request object if available'''
-
-        try:
-            return PendingRequest.objects.get(pk=pk)
-        except PendingRequest.DoesNotExist:
-            raise Http404
-
     def put(self, request, pk, format=None):
         '''Librarian method to close a request if user has requested to close it.'''
-        req = self.get_object(pk)
+        req = self.get_object()
         serializer = RequestSerializer(req, data=request.data)
 
         if req.status == 'B':

@@ -40,7 +40,7 @@ class RequestSerializer(serializers.ModelSerializer):
                 Q(request_user=request_user) & Q(status='A')
             ).count() >=3:
                 raise serializers.ValidationError('The user already has 3 or more issued books.')
-            if not request_book.number_of_books > 0:
+            if request_book.number_of_books == 0:
                 raise serializers.ValidationError('No copies of the book are available.')
         return attrs
 

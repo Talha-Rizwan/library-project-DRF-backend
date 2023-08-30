@@ -169,8 +169,8 @@ class CloseBookRequest(generics.UpdateAPIView):
                 try:
                     instance.requested_book.number_of_books +=1
                     instance.requested_book.save()
-                except Exception as error:
-                    print(error)
+                except PendingRequest.DoesNotExist as error:
+                    print(f'Request does not exist {error}')
 
             return Response(serializer.data)
         return Response(

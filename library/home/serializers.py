@@ -1,10 +1,8 @@
 '''All serializers for home application models'''
-from django.db.models import Q
-
 from rest_framework import serializers
 
 from home.models import Book, PendingRequest
-
+from home.constants import APPROVED_STATUS
 # pylint: disable=R0903
 class BookSerializer(serializers.ModelSerializer):
     '''Generic serializer for book model'''
@@ -37,8 +35,9 @@ class RequestSerializer(serializers.ModelSerializer):
         request_book = attrs.get('requested_book')
         if is_creation:
             if PendingRequest.objects.filter(
-                Q(request_user=request_user) & Q(status='A')
-            ).count() >=3:
+                request_user=request_user, 
+                status=APPROVED_STATUS
+                ).count() >=3:
                 raise serializers.ValidationError('The user already has 3 or more issued books.')
             if request_book.number_of_books == 0:
                 raise serializers.ValidationError('No copies of the book are available.')

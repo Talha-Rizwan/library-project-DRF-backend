@@ -9,6 +9,7 @@ from home.serializers import BookSerializer
 from home.tests.factories import BookFactory
 from home.models import Book
 from home.tests.constants import BATCH_SIZE, FORMAT
+from userapp.tests.constants import USER_PASSWORD
 from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
 
@@ -31,7 +32,7 @@ class BookViewSetTestCase(APITestCase):
 
         data = {
             "username": self.librarian_user.username,
-            "password": 'password123'
+            "password": USER_PASSWORD
         }
         token = get_jwt_token(data)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
@@ -129,7 +130,7 @@ class BookViewSetTestCase(APITestCase):
         '''test to delete a book with a simple user (not librarian)'''
         user = {
             "username": self.customer_user.username,
-            "password": 'password123'
+            "password": USER_PASSWORD
         }
         token = get_jwt_token(user)['token']['access']
         

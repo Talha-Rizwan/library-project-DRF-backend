@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from userapp.tests.factories import UserFactory
+from userapp.tests.constants import USER_PASSWORD
 
 class UserLoginProfileViewTest(APITestCase):
     '''Class to test all the user login functionality'''
@@ -17,7 +18,7 @@ class UserLoginProfileViewTest(APITestCase):
         '''Test to login a user using the correct credentials.'''
         data = {
             "username": self.user.username,
-            "password": 'password123'
+            "password": USER_PASSWORD
         }
         response = self.client.post(self.url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -37,7 +38,7 @@ class UserLoginProfileViewTest(APITestCase):
         '''Test to login a user with invalid username.'''
         data = {
             "username": "incorrect",
-            "password": 'password123'
+            "password": USER_PASSWORD
         }
         response = self.client.post(self.url, data=data, format='json')
         self.assertEqual(response.data['message'], "imvalid credentials")

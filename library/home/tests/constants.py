@@ -1,2 +1,3 @@
 BATCH_SIZE = 10
 FORMAT = 'json'
+USER_PASSWORD = 'password123'

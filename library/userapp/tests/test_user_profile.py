@@ -7,6 +7,7 @@ from rest_framework.test import APITestCase
 from userapp.tests.factories import UserFactory
 from userapp.serializers import UserSerializer
 from userapp.utlis import get_jwt_token
+from userapp.tests.constants import USER_PASSWORD
 
 class UserProfileViewTest(APITestCase):
     '''Class to test the signup and update profile scenarios.'''
@@ -20,7 +21,7 @@ class UserProfileViewTest(APITestCase):
         self.user = UserFactory()
         data = {
             "username": self.user.username,
-            "password": 'password123'
+            "password": USER_PASSWORD
         }
         token = get_jwt_token(data)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')

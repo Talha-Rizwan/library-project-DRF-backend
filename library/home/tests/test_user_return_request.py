@@ -6,6 +6,7 @@ from rest_framework.test import APITestCase
 
 from home.tests.factories import UserBookRequestFactory
 from home.tests.constants import FORMAT
+from userapp.tests.constants import USER_PASSWORD
 from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
 
@@ -26,7 +27,7 @@ class UserReturnRequestTestCase(APITestCase):
 
         data = {
             "username": self.customer_user.username,
-            "password": 'password123'
+            "password": USER_PASSWORD
         }
         token = get_jwt_token(data)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
@@ -47,7 +48,7 @@ class UserReturnRequestTestCase(APITestCase):
 
         data = {
             "username": self.another_customer_user.username,
-            "password": 'password123'
+            "password": USER_PASSWORD
         }
         token = get_jwt_token(data)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')

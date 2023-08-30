@@ -8,6 +8,7 @@ from rest_framework.test import APITestCase
 from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
 from home.tests.constants import BATCH_SIZE, FORMAT
+from userapp.tests.constants import USER_PASSWORD
 from home.tests.factories import UserBookRequestFactory
 
 class LibrarianCloseRequestTestCase(APITestCase):
@@ -32,7 +33,7 @@ class LibrarianCloseRequestTestCase(APITestCase):
 
         data = {
             "username": self.librarian_user.username,
-            "password": 'password123'
+            "password": USER_PASSWORD
         }
         token = get_jwt_token(data)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
@@ -79,7 +80,7 @@ class LibrarianCloseRequestTestCase(APITestCase):
         '''Test to close a request with a simple unauthorized user.'''
         data = {
             "username": self.customer_user.username,
-            "password": 'password123'
+            "password": USER_PASSWORD
         }
         token = get_jwt_token(data)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')

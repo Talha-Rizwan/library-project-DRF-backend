@@ -1,6 +1,7 @@
 '''Tests to get all user pending request by librarian user.'''
 
 from django.contrib.auth.models import Permission
+from django.urls import reverse
 
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -20,7 +21,7 @@ class LibrarianListRequestTestCase(APITestCase):
         Getting the jwt authentication token for librarian user.
         '''
         self.requests = UserBookRequestFactory.create_batch(BATCH_SIZE)
-        self.url = '/api/home/request/'
+        self.url = reverse('request_list')
         self.customer_user = UserFactory()
         self.librarian_user = UserFactory()
         librarian = Permission.objects.get(codename='is_librarian')

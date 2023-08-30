@@ -1,4 +1,6 @@
 '''Test to create/get a user book request.'''
+from django.urls import reverse
+
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -17,7 +19,7 @@ class UserRequestTestCase(APITestCase):
         self.request = UserBookRequestFactory()
         self.customer_user = self.request.request_user
         self.request.request_user = self.customer_user
-        self.url = '/api/home/user-request/'
+        self.url = reverse('pending_request')
 
         data = {
             "username": self.customer_user.username,

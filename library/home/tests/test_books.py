@@ -1,5 +1,6 @@
 '''Test cases for the api/home/book-view-set/ api'''
 from django.contrib.auth.models import Permission
+from django.urls import reverse
 
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -12,7 +13,7 @@ from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
 
 class BookViewSetTestCase(APITestCase):
-    '''Class to test the View of BookViewSet using the url api/home/book-view-set/'''
+    '''Class to test the View of BookViewSet using the api book-view-set'''
     def setUp(self):
         '''
         setUp class create a batch of book instances, 
@@ -22,7 +23,8 @@ class BookViewSetTestCase(APITestCase):
         self.books = BookFactory.create_batch(BATCH_SIZE)
         self.customer_user = UserFactory()
         self.librarian_user = UserFactory()
-        self.url = '/api/home/book-view-set/'
+        self.url_list = reverse('book-list')
+        self.detail_url_name = 'book-detail'
         librarian = Permission.objects.get(codename='is_librarian')
         self.librarian_user.user_permissions.add(librarian)
         self.librarian_user.save()
@@ -37,7 +39,7 @@ class BookViewSetTestCase(APITestCase):
     def test_list_books(self):
         '''Test to list all books by anonyous user'''
         self.client.credentials()
-        response = self.client.get(self.url)
+        response = self.client.get(self.url_list)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["data"]), BATCH_SIZE)
 
@@ -46,7 +48,7 @@ class BookViewSetTestCase(APITestCase):
         serializer = BookSerializer(BookFactory.build())
         data = serializer.data
         del data['cover_image']
-        response = self.client.post(self.url, data=data, format=FORMAT)
+        response = self.client.post(self.url_list, data=data, format=FORMAT)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['name'], data['name'])
 
@@ -56,7 +58,7 @@ class BookViewSetTestCase(APITestCase):
         serializer = BookSerializer(BookFactory.build())
         data = serializer.data
         del data['cover_image']
-        response = self.client.post(self.url, data=data, format=FORMAT)
+        response = self.client.post(self.url_list, data=data, format=FORMAT)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_book_with_customer_user(self):
@@ -70,20 +72,22 @@ class BookViewSetTestCase(APITestCase):
         serializer = BookSerializer(BookFactory.build())
         data = serializer.data
         del data['cover_image']
-        response = self.client.post(self.url, data=data, format=FORMAT)
+        response = self.client.post(self.url_list, data=data, format=FORMAT)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_retrieve_book(self):
         '''Test to get a book by passing book id using anonymous user.'''
         self.client.credentials()
-        response = self.client.get(f'{self.url}{self.books[0].id}/')
+        response = self.client.get(reverse(self.detail_url_name, args=[self.books[0].id]))
+        
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
     def test_retrieve_book_with_invalid_id(self):
         '''Test to get a book with its id that doesnot exist.'''
         self.client.credentials()
-        response = self.client.get(f'{self.url}100/')
+        response = self.client.get(reverse(self.detail_url_name, args=[100]))
+
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
@@ -94,7 +98,8 @@ class BookViewSetTestCase(APITestCase):
         data['name'] = "Updated Book Name"
         data["number_of_books"] = 10
         del data['cover_image']
-        response = self.client.put(f'{self.url}{self.books[0].id}/', data=data, format=FORMAT)
+        response = self.client.put(reverse(self.detail_url_name, args=[self.books[0].id]), data=data, format=FORMAT)
+        
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["name"], 'Updated Book Name')
         self.assertEqual(response.data['number_of_books'], 10)
@@ -107,13 +112,15 @@ class BookViewSetTestCase(APITestCase):
         data['name'] = "Updated Book Name"
         data["number_of_books"] = 10
         del data['cover_image']
-        response = self.client.put(f'{self.url}100/', data=data, format=FORMAT)
+        response = self.client.put(reverse(self.detail_url_name, args=[100]), data=data, format=FORMAT)
+        
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
     def test_delete_book(self):
         '''Test to delete a book using librarian user.'''
-        response = self.client.delete(f'{self.url}{self.books[0].id}/')
+        response = self.client.delete(reverse(self.detail_url_name, args=[self.books[0].id]))        
+        
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Book.objects.filter(id=1).exists())
 
@@ -125,23 +132,23 @@ class BookViewSetTestCase(APITestCase):
             "password": 'password123'
         }
         token = get_jwt_token(user)['token']['access']
+        
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
-
-        response = self.client.delete(f'{self.url}{self.books[0].id}/')
+        response = self.client.delete(reverse(self.detail_url_name, args=[self.books[0].id]))        
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
     def test_search_books(self):
         '''Test to search a book using its name by anonymous user.'''
-        url = f'{self.url}?name={self.books[0].name}'
-        response = self.client.get(url)
+        response = self.client.get(f'{self.url_list}?name={self.books[0].name}')
+        
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.books[0].id, response.data[0]['id'])
 
 
     def test_search_books_with_wrong_param(self):
         '''test to search a book using wrong params in the url instead of name.'''
-        url = f'{self.url}?wrong={self.books[0].name}'
-        response = self.client.get(url)
+        response = self.client.get(f'{self.url_list}?wrong={self.books[0].name}')
+        
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['data']), BATCH_SIZE)

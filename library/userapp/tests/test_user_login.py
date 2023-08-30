@@ -1,4 +1,6 @@
 '''Test user login functionality.'''
+from django.urls import reverse
+
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -7,7 +9,7 @@ from userapp.tests.factories import UserFactory
 class UserLoginProfileViewTest(APITestCase):
     '''Class to test all the user login functionality'''
     def setUp(self):
-        self.url = '/api/user/login/'
+        self.url = reverse('login')
         self.user = UserFactory()
 
 

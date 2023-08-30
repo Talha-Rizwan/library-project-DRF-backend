@@ -1,5 +1,6 @@
 '''Tests to close request user book request.'''
 from django.contrib.auth.models import Permission
+from django.urls import reverse
 
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -12,7 +13,7 @@ from home.tests.factories import UserBookRequestFactory
 class LibrarianCloseRequestTestCase(APITestCase):
     '''
     Class to test CloseBookRequest view. 
-    The api url /api/home/close-request/
+    The api url name = close_request
     '''
     def setUp(self):
         '''
@@ -20,7 +21,7 @@ class LibrarianCloseRequestTestCase(APITestCase):
         creating user to two types i-e simple user and librarain.
         '''
         self.requests = UserBookRequestFactory.create_batch(BATCH_SIZE)
-        self.url = '/api/home/close-request/'
+        self.url_name = 'close_request'
         self.customer_user = UserFactory()
         self.librarian_user = UserFactory()
         librarian = Permission.objects.get(codename='is_librarian')
@@ -39,7 +40,7 @@ class LibrarianCloseRequestTestCase(APITestCase):
     def test_librarian_close_request(self):
         '''Test to close user request with B status by a librarian user.'''
         response = self.client.put(
-            f'{self.url}{self.requests[0].id}/',
+            reverse(self.url_name, args=[self.requests[0].id]),
             data={"status": "C"},
             format=FORMAT
             )
@@ -50,7 +51,7 @@ class LibrarianCloseRequestTestCase(APITestCase):
         '''Test to close user request with B status by an anonymous user.'''
         self.client.credentials()
         response = self.client.put(
-            f'{self.url}{self.requests[0].id}/',
+            reverse(self.url_name, args=[self.requests[0].id]),
             data={"status": "A"},
             format=FORMAT
             )
@@ -59,7 +60,7 @@ class LibrarianCloseRequestTestCase(APITestCase):
     def test_update_request_with_wrong_input(self):
         '''Test to send wrong body data to api using librarian user.'''
         response = self.client.put(
-            f'{self.url}{self.requests[0].id}/',
+            reverse(self.url_name, args=[self.requests[0].id]),
             data={"status": "Incorrect"},
             format=FORMAT
             )
@@ -68,7 +69,7 @@ class LibrarianCloseRequestTestCase(APITestCase):
     def test_librarain_close_non_existant_request(self):
         '''Test to update the status of a request that doesnot exist.'''
         response = self.client.put(
-            f'{self.url}100/',
+            reverse(self.url_name, args=[100]),
             data={"status": "C"},
             format=FORMAT
             )
@@ -83,7 +84,7 @@ class LibrarianCloseRequestTestCase(APITestCase):
         token = get_jwt_token(data)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
         response = self.client.put(
-            f'{self.url}{self.requests[0].id}/',
+            reverse(self.url_name, args=[self.requests[0].id]),
             data={"status": "A"},
             format=FORMAT
             )

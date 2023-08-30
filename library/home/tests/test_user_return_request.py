@@ -1,4 +1,6 @@
 '''Tests to return back a book by trying to close a book request by user.'''
+from django.urls import reverse
+
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -20,7 +22,7 @@ class UserReturnRequestTestCase(APITestCase):
         self.request.request_user = self.customer_user
         self.request.status = 'A'
         self.request.save()
-        self.url = '/api/home/return-request/'
+        self.url_name = 'return_request'
 
         data = {
             "username": self.customer_user.username,
@@ -32,7 +34,7 @@ class UserReturnRequestTestCase(APITestCase):
     def test_request_to_close_by_user_owner(self):
         '''Test to change status of request to B by the owner account.'''
         response = self.client.put(
-            f'{self.url}{self.request.id}/',
+            reverse(self.url_name, args=[self.request.id]),
             data={"status": "B"},
             format=FORMAT
             )
@@ -51,7 +53,7 @@ class UserReturnRequestTestCase(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
         response = self.client.put(
-            f'{self.url}{self.request.id}/',
+            reverse(self.url_name, args=[self.request.id]),
             data={"status": "B"},
             format=FORMAT
             )
@@ -65,7 +67,7 @@ class UserReturnRequestTestCase(APITestCase):
         '''Test to change status of request to B by anonymous user.'''
         self.client.credentials()
         response = self.client.put(
-            f'{self.url}{self.request.id}/',
+            reverse(self.url_name, args=[self.request.id]),
             data={"status": "B"},
             format=FORMAT
             )
@@ -75,7 +77,7 @@ class UserReturnRequestTestCase(APITestCase):
     def test_request_not_exist(self):
         '''Test to update status of request that doesnot exist.'''
         response = self.client.put(
-            f'{self.url}10/',
+            reverse(self.url_name, args=[10]),
             data={"status": "B"},
             format=FORMAT
             )
@@ -87,7 +89,7 @@ class UserReturnRequestTestCase(APITestCase):
         self.request.status = 'P'
         self.request.save()
         response = self.client.put(
-            f'{self.url}{self.request.id}/',
+            reverse(self.url_name, args=[self.request.id]),
             data={"status": "B"},
             format=FORMAT
             )

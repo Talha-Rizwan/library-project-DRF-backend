@@ -1,5 +1,6 @@
 '''Tests to get or approve/reject user pending request.'''
 from django.contrib.auth.models import Permission
+from django.urls import reverse
 
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -19,7 +20,7 @@ class LibrarianDetailRequestTestCase(APITestCase):
         Getting the jwt authentication token for librarian user.
         '''
         self.requests = UserBookRequestFactory.create_batch(BATCH_SIZE)
-        self.url = '/api/home/request/'
+        self.url_name = 'request_detail'
         self.customer_user = UserFactory()
         self.librarian_user = UserFactory()
         librarian = Permission.objects.get(codename='is_librarian')
@@ -36,7 +37,7 @@ class LibrarianDetailRequestTestCase(APITestCase):
     def test_get_request(self):
         '''Test to get a request using its id by a librarian user.'''
         response = self.client.get(
-            f'{self.url}{self.requests[0].id}/',
+            reverse(self.url_name, args=[self.requests[0].id]),
             format=FORMAT
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -45,7 +46,7 @@ class LibrarianDetailRequestTestCase(APITestCase):
     def test_get_request_with_wrong_id(self):
         '''Test to get request that doesnot exist.'''
         response = self.client.get(
-            f'{self.url}{1000}/',
+            reverse(self.url_name, args=[1000]),
             format=FORMAT
             )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -55,7 +56,7 @@ class LibrarianDetailRequestTestCase(APITestCase):
         '''Test to get a request without authentication.'''
         self.client.credentials()
         response = self.client.get(
-            f'{self.url}{self.requests[0].id}/',
+            reverse(self.url_name, args=[self.requests[0].id]),
             format=FORMAT
             )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -69,13 +70,16 @@ class LibrarianDetailRequestTestCase(APITestCase):
         token = get_jwt_token(data)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
-        response = self.client.get(f'{self.url}{self.requests[0].id}/', format=FORMAT)
+        response = self.client.get(
+            reverse(self.url_name, args=[self.requests[0].id]),
+            format=FORMAT
+            )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_librarian_approve_request(self):
         '''Test to approve a user request by a librarian via id.'''
         response = self.client.put(
-            f'{self.url}{self.requests[0].id}/',
+            reverse(self.url_name, args=[self.requests[0].id]),
             data={"status": "A"},
             format=FORMAT
             )
@@ -86,7 +90,7 @@ class LibrarianDetailRequestTestCase(APITestCase):
         '''Test to approve a request using ananymous user.'''
         self.client.credentials()
         response = self.client.put(
-            f'{self.url}{self.requests[0].id}/',
+            reverse(self.url_name, args=[self.requests[0].id]),
             data={"status": "A"},
             format=FORMAT
             )
@@ -95,7 +99,7 @@ class LibrarianDetailRequestTestCase(APITestCase):
     def test_librarian_reject_request(self):
         '''Test to reject a user request by a librarian via id.'''
         response = self.client.put(
-            f'{self.url}{self.requests[0].id}/',
+            reverse(self.url_name, args=[self.requests[0].id]),
             data={"status": "R"},
             format=FORMAT
             )
@@ -106,7 +110,7 @@ class LibrarianDetailRequestTestCase(APITestCase):
         '''Test to reject a user request by a simple user via id.'''
         self.client.credentials()
         response = self.client.put(
-            f'{self.url}{self.requests[0].id}/',
+            reverse(self.url_name, args=[self.requests[0].id]),
             data={"status": "R"},
             format=FORMAT
             )
@@ -115,7 +119,7 @@ class LibrarianDetailRequestTestCase(APITestCase):
     def test_update_request_with_wrong_input(self):
         '''Test to send wrong input in the request body.'''
         response = self.client.put(
-            f'{self.url}{self.requests[0].id}/',
+            reverse(self.url_name, args=[self.requests[0].id]),
             data={"status": "Incorrect"},
             format=FORMAT
             )
@@ -124,7 +128,7 @@ class LibrarianDetailRequestTestCase(APITestCase):
     def test_librarain_non_existant_request(self):
         '''Test to update a request that doesnot exist.'''
         response = self.client.put(
-            f'{self.url}100/',
+            reverse(self.url_name, args=[100]),
             data={"status": "R"},
             format=FORMAT
             )

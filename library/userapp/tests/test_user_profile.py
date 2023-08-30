@@ -1,4 +1,6 @@
 '''Tests to manpulate user profile/account.'''
+from django.urls import reverse
+
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -14,7 +16,7 @@ class UserProfileViewTest(APITestCase):
         creating a user instance using UserFactory class.
         getting the jwt token for making authenticated requests.
         '''
-        self.url = '/api/user/user-profile/'
+        self.url = reverse('user_profile')
         self.user = UserFactory()
         data = {
             "username": self.user.username,

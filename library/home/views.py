@@ -2,7 +2,7 @@
 from django.db.models import Q
 from django.http import Http404
 
-from rest_framework import generics, status, viewsets
+from rest_framework import generics, status, viewsets, mixins
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -91,24 +91,24 @@ class UserBookRequestView(APIView):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-
-class ListBookRequestView(generics.ListAPIView):
+class BookRequestView(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, generics.GenericAPIView):
     '''
-    All the pending requests list view
+    All the pending requests Librarian view to get or update user requests
     Only for Librarian/Admin
     '''
-    queryset = PendingRequest.objects.filter(status=PENDING_STATUS)
-    serializer_class = RequestSerializer
-    permission_classes = [IsLibrarianAuthenticated]
-    authentication_classes = [JWTAuthentication]
-
-
-class DetailBookRequestView(generics.RetrieveUpdateAPIView):
-    '''Librarian view to get or update user request'''
     queryset = PendingRequest.objects.all()
     serializer_class = RequestSerializer
     permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
+
+    def get(self, request, *args, **kwargs):
+        if 'pk' in kwargs:
+            return self.retrieve(request, *args, **kwargs)
+        else:
+            return self.list(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
 
     def perform_update(self, serializer):
         instance = serializer.save()
@@ -117,9 +117,8 @@ class DetailBookRequestView(generics.RetrieveUpdateAPIView):
             try:
                 instance.requested_book.number_of_books -= 1
                 instance.requested_book.save()
-            except Exception as error:
-                print(error)
-
+            except PendingRequest.DoesNotExist:
+                print('The request does not exist.')
 
 class UserReturnBookView(generics.UpdateAPIView):
     '''

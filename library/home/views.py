@@ -2,7 +2,7 @@
 from django.db.models import Q
 from django.http import Http404
 
-from rest_framework import generics, status, viewsets
+from rest_framework import generics, status, viewsets, mixins
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -11,7 +11,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from home.serializers import BookSerializer, RequestSerializer, UserBookRequestSerializer
 from home.models import Book, PendingRequest
 from userapp.permissions import LibrarianAuthenticatedOrReadOnly, IsLibrarianAuthenticated
-
+from home.constants import PENDING_STATUS, APPROVED_STATUS, RETURN_BACK_STATUS, CLOSED_STATUS
 
 class BookViewSet(viewsets.ModelViewSet):
     '''
@@ -53,16 +53,16 @@ class UserBookRequestView(APIView):
         Authenticated user can view all his issued, requested and returned books.
         '''
         issued_books = PendingRequest.objects.filter(
-            request_user=request.user, status='A'
+            request_user=request.user, status=APPROVED_STATUS
         ).values_list('requested_book__name', flat=True)
 
         requested_books = PendingRequest.objects.filter(
-            request_user=request.user, status='P'
+            request_user=request.user, status=PENDING_STATUS
         ).values_list('requested_book__name', flat=True)
 
         returned_books = PendingRequest.objects.filter(
-            Q(request_user=request.user, status='C') |
-            Q(request_user=request.user, status='B')
+            Q(request_user=request.user, status=CLOSED_STATUS) |
+            Q(request_user=request.user, status=RETURN_BACK_STATUS)
         ).values_list('requested_book__name', flat=True)
 
         data = {
@@ -73,12 +73,8 @@ class UserBookRequestView(APIView):
 
         serializer = UserBookRequestSerializer(data)
         return Response({
-            'status': True,
-            'message': 'success data',
-            'data': {
                 'books': serializer.data
-            }
-        }, status=status.HTTP_200_OK)
+            }, status=status.HTTP_200_OK)
 
     def post(self, request):
         '''Authenticated user to create a new pending request for a book.'''
@@ -88,139 +84,93 @@ class UserBookRequestView(APIView):
             raise Http404
 
         data = request.data
-        data['status'] = 'P'
+        data['status'] = PENDING_STATUS
         data['request_user'] = request.user.id
         serializer = RequestSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-
-class ListBookRequestView(generics.ListAPIView):
+class BookRequestView(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, generics.GenericAPIView):
     '''
-    All the pending requests list view
+    All the pending requests Librarian view to get or update user requests
     Only for Librarian/Admin
     '''
-    queryset = PendingRequest.objects.filter(status='P')
+    queryset = PendingRequest.objects.all()
     serializer_class = RequestSerializer
     permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
 
+    def get(self, request, *args, **kwargs):
+        if 'pk' in kwargs:
+            return self.retrieve(request, *args, **kwargs)
+        else:
+            return self.list(request, *args, **kwargs)
 
-class DetailBookRequestView(APIView):
-    '''Librarian view to get or update user request'''
-    permission_classes = [IsLibrarianAuthenticated]
-    authentication_classes = [JWTAuthentication]
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
 
-    def get_object(self, pk):
-        '''Returns requested pending request object if available'''
-
-        try:
-            return PendingRequest.objects.get(pk=pk)
-        except PendingRequest.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        '''
-        To get a specific user request
-        by passing in the primary key.
-        '''
-        req = self.get_object(pk)
-        serializer = RequestSerializer(req)
-        return Response (serializer.data)
-
-    def put(self, request, pk, format=None):
-        '''
-        Update the request status from Pending to Approved or Rejected.
-        Permissions are only for librarian/admin.
-        '''
-        req = self.get_object(pk)
-        request.data['requested_book'] = req.requested_book.id
-        serializer = RequestSerializer(req, data=request.data)
-        serializer.is_valid(raise_exception=True)
+    def perform_update(self, serializer):
         instance = serializer.save()
 
-        if request.data['status'] == 'A':
-
+        if serializer.validated_data.get('status') == APPROVED_STATUS:
             try:
                 instance.requested_book.number_of_books -= 1
                 instance.requested_book.save()
-            except Exception as error:
-                print(error)
+            except PendingRequest.DoesNotExist:
+                print('The request does not exist.')
 
-        return Response(serializer.data)
-
-
-class UserReturnBookView(APIView):
+class UserReturnBookView(generics.UpdateAPIView):
     '''
     User view to initiate a return request.
-    Uver can only request to return its own request.
+    User can only request to return their own request.
     '''
+    queryset = PendingRequest.objects.all()
+    serializer_class = RequestSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def get_object(self, pk):
-        '''Return specific request object if available'''
+    def update(self, request, pk, format=None):
+        req = self.get_object()
 
-        try:
-            return PendingRequest.objects.get(pk=pk)
-        except PendingRequest.DoesNotExist:
-            raise Http404
-
-    def put(self, request, pk, format=None):
-        '''
-        User method to request to return back the book 
-        (needs to be approved by librarian)
-        '''
-        req = self.get_object(pk)
-        request.data['requested_book'] = req.requested_book.id
-        serializer = RequestSerializer(req, data=request.data)
-       
-        if req.request_user == request.user and req.status == 'A':
-            request.data['status'] = 'B'
-            
+        if req.request_user == request.user and req.status == APPROVED_STATUS:
+            request.data['status'] = RETURN_BACK_STATUS
+            serializer = self.get_serializer(req, data=request.data)
             serializer.is_valid(raise_exception=True)
-            serializer.save()
+            self.perform_update(serializer)
             return Response(serializer.data)
 
         return Response(
-            {'message': 'the user is not authorized or request is currently not approved.'},
+            {'message': 'The user is not authorized or the request is currently not approved.'},
             status=status.HTTP_405_METHOD_NOT_ALLOWED
         )
 
 
-class CloseBookRequest(APIView):
+class CloseBookRequest(generics.UpdateAPIView):
     '''
     Librarian view to close a return book request.
     Exclusive to librarian/admin only.
     '''
+    queryset = PendingRequest.objects.all()
     permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def get_object(self, pk):
-        '''Return requested request object if available'''
-
-        try:
-            return PendingRequest.objects.get(pk=pk)
-        except PendingRequest.DoesNotExist:
-            raise Http404
-
     def put(self, request, pk, format=None):
         '''Librarian method to close a request if user has requested to close it.'''
-        req = self.get_object(pk)
+        req = self.get_object()
         serializer = RequestSerializer(req, data=request.data)
 
-        if req.status == 'B':
+        if req.status == RETURN_BACK_STATUS:
             serializer.is_valid(raise_exception=True)
             instance = serializer.save()
 
-            if request.data['status'] == 'C':
+            if request.data['status'] == CLOSED_STATUS:
 
                 try:
                     instance.requested_book.number_of_books +=1
                     instance.requested_book.save()
-                except Exception as error:
-                    print(error)
+                except PendingRequest.DoesNotExist as error:
+                    print(f'Request does not exist {error}')
 
             return Response(serializer.data)
         return Response(

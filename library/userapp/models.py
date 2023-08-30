@@ -2,7 +2,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-from userapp.constants import GENDER_CHOICES, ROLE_CHOICES
+from userapp.constants import GENDER_CHOICES
 
 class User(AbstractUser):
     '''
@@ -13,15 +13,12 @@ class User(AbstractUser):
     phone = models.CharField(max_length=20, blank=True, null=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True)
 
-    role = models.CharField(max_length=1, choices=ROLE_CHOICES, null=False, default='C')
-
     REQUIRED_FIELDS = []
 
     class Meta:
         '''Available permissions to have different powers in the app.'''
         permissions = [
-            ('is_librarian', 'Is librarian or above'),
-            ('is_admin', 'Is an admin')
+            ('is_librarian', 'Is librarian or above')
         ]
 
     def __str__(self):

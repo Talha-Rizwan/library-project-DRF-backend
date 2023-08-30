@@ -19,7 +19,7 @@ class UserLoginProfileViewTest(APITestCase):
         }
         response = self.client.post(self.url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIsNotNone(response.data['data']['token'])
+        self.assertIsNotNone(response.data['token'])
 
     def test_user_invalid_password_login(self):
         '''Test to login a user with invalid password'''

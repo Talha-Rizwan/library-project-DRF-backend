@@ -15,5 +15,5 @@ class UserFactory(django.DjangoModelFactory):
     full_name = Faker('text', max_nb_chars=50)
     phone = Faker('phone_number')
     gender = Faker('random_element', elements=('M', 'F'))
-    role = Faker('random_element', elements=('C', 'L', 'A'))
+    # role = Faker('random_element', elements=('C', 'L', 'A'))
     

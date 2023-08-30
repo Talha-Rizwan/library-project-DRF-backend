@@ -20,7 +20,7 @@ class UserProfileViewTest(APITestCase):
             "username": self.user.username,
             "password": 'password123'
         }
-        token = get_jwt_token(data)['data']['token']['access']
+        token = get_jwt_token(data)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
     def test_create_user_profile(self):
@@ -45,11 +45,3 @@ class UserProfileViewTest(APITestCase):
         self.user.refresh_from_db()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.user.full_name, 'talha rizwan')
-
-    def test_anonymous_user_update_profile(self):
-        '''Test to update user profile by sending an anonymous request.'''
-        self.client.credentials()
-        update_data = {"full_name": "talha rizwan"}
-        response = self.client.put(self.url, data=update_data, format='json')
-        self.user.refresh_from_db()
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

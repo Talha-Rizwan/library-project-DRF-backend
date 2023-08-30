@@ -11,7 +11,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from home.serializers import BookSerializer, RequestSerializer, UserBookRequestSerializer
 from home.models import Book, PendingRequest
 from userapp.permissions import LibrarianAuthenticatedOrReadOnly, IsLibrarianAuthenticated
-
+from home.constants import PENDING_STATUS, APPROVED_STATUS, RETURN_BACK_STATUS, CLOSED_STATUS
 
 class BookViewSet(viewsets.ModelViewSet):
     '''
@@ -53,16 +53,16 @@ class UserBookRequestView(APIView):
         Authenticated user can view all his issued, requested and returned books.
         '''
         issued_books = PendingRequest.objects.filter(
-            request_user=request.user, status='A'
+            request_user=request.user, status=APPROVED_STATUS
         ).values_list('requested_book__name', flat=True)
 
         requested_books = PendingRequest.objects.filter(
-            request_user=request.user, status='P'
+            request_user=request.user, status=PENDING_STATUS
         ).values_list('requested_book__name', flat=True)
 
         returned_books = PendingRequest.objects.filter(
-            Q(request_user=request.user, status='C') |
-            Q(request_user=request.user, status='B')
+            Q(request_user=request.user, status=CLOSED_STATUS) |
+            Q(request_user=request.user, status=RETURN_BACK_STATUS)
         ).values_list('requested_book__name', flat=True)
 
         data = {
@@ -84,7 +84,7 @@ class UserBookRequestView(APIView):
             raise Http404
 
         data = request.data
-        data['status'] = 'P'
+        data['status'] = PENDING_STATUS
         data['request_user'] = request.user.id
         serializer = RequestSerializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -97,7 +97,7 @@ class ListBookRequestView(generics.ListAPIView):
     All the pending requests list view
     Only for Librarian/Admin
     '''
-    queryset = PendingRequest.objects.filter(status='P')
+    queryset = PendingRequest.objects.filter(status=PENDING_STATUS)
     serializer_class = RequestSerializer
     permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
@@ -113,7 +113,7 @@ class DetailBookRequestView(generics.RetrieveUpdateAPIView):
     def perform_update(self, serializer):
         instance = serializer.save()
 
-        if serializer.validated_data.get('status') == 'A':
+        if serializer.validated_data.get('status') == APPROVED_STATUS:
             try:
                 instance.requested_book.number_of_books -= 1
                 instance.requested_book.save()
@@ -134,8 +134,8 @@ class UserReturnBookView(generics.UpdateAPIView):
     def update(self, request, pk, format=None):
         req = self.get_object()
 
-        if req.request_user == request.user and req.status == 'A':
-            request.data['status'] = 'B'
+        if req.request_user == request.user and req.status == APPROVED_STATUS:
+            request.data['status'] = RETURN_BACK_STATUS
             serializer = self.get_serializer(req, data=request.data)
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)
@@ -161,11 +161,11 @@ class CloseBookRequest(generics.UpdateAPIView):
         req = self.get_object()
         serializer = RequestSerializer(req, data=request.data)
 
-        if req.status == 'B':
+        if req.status == RETURN_BACK_STATUS:
             serializer.is_valid(raise_exception=True)
             instance = serializer.save()
 
-            if request.data['status'] == 'C':
+            if request.data['status'] == CLOSED_STATUS:
 
                 try:
                     instance.requested_book.number_of_books +=1

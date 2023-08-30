@@ -6,6 +6,7 @@ from rest_framework.test import APITestCase
 
 from home.tests.factories import UserBookRequestFactory, BookFactory
 from home.tests.constants import FORMAT
+from home.constants import APPROVED_STATUS, PENDING_STATUS
 from userapp.tests.constants import USER_PASSWORD
 from userapp.utlis import get_jwt_token
 
@@ -67,11 +68,11 @@ class UserRequestTestCase(APITestCase):
         new_book = BookFactory()
         data = {
             "requested_book" : new_book.id,
-            "status" : "A"
+            'status' : APPROVED_STATUS
         }
         response = self.client.post(self.url,data=data, format=FORMAT)
         self.assertEqual(response.status_code,status.HTTP_201_CREATED)
-        self.assertEqual(response.data['status'], "P")
+        self.assertEqual(response.data['status'], PENDING_STATUS)
 
     def test_get_requests(self):
         '''Test to get all the user request books.'''

@@ -4,3 +4,4 @@ GENDER_CHOICES = (
         ('F', 'Female'),
         ('O', 'Other'),
     )
+LIBRARIAN_PERMISSION = 'is_librarian'

@@ -1,6 +1,7 @@
 '''Factory classes to create instances of models in home application.'''
 from factory import django, Faker, SubFactory
 from home.models import Book, PendingRequest
+from home.constants import PENDING_STATUS
 from userapp.tests.factories import UserFactory
 
 class BookFactory(django.DjangoModelFactory):
@@ -27,6 +28,6 @@ class UserBookRequestFactory(django.DjangoModelFactory):
     class Meta:
         '''Using the model PendingRequest for this factory class.'''
         model = PendingRequest
-    status = 'P'
+    status = PENDING_STATUS
     requested_book = SubFactory(BookFactory)
     request_user = SubFactory(UserFactory)

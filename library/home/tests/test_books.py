@@ -9,6 +9,7 @@ from home.serializers import BookSerializer
 from home.tests.factories import BookFactory
 from home.models import Book
 from home.tests.constants import BATCH_SIZE, FORMAT
+from userapp.constants import LIBRARIAN_PERMISSION
 from userapp.tests.constants import USER_PASSWORD
 from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
@@ -26,7 +27,7 @@ class BookViewSetTestCase(APITestCase):
         self.librarian_user = UserFactory()
         self.url_list = reverse('book-list')
         self.detail_url_name = 'book-detail'
-        librarian = Permission.objects.get(codename='is_librarian')
+        librarian = Permission.objects.get(codename=LIBRARIAN_PERMISSION)
         self.librarian_user.user_permissions.add(librarian)
         self.librarian_user.save()
 
@@ -66,7 +67,7 @@ class BookViewSetTestCase(APITestCase):
         '''Test to create user with customer user.'''
         user = {
             "username": self.customer_user.username,
-            "password": 'password123'
+            "password": USER_PASSWORD
         }
         token = get_jwt_token(user)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')

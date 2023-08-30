@@ -6,6 +6,7 @@ from rest_framework.test import APITestCase
 
 from home.tests.factories import UserBookRequestFactory
 from home.tests.constants import FORMAT
+from home.constants import PENDING_STATUS, APPROVED_STATUS, RETURN_BACK_STATUS
 from userapp.tests.constants import USER_PASSWORD
 from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
@@ -21,7 +22,7 @@ class UserReturnRequestTestCase(APITestCase):
         self.request = UserBookRequestFactory()
         self.customer_user = self.request.request_user
         self.request.request_user = self.customer_user
-        self.request.status = 'A'
+        self.request.status = APPROVED_STATUS
         self.request.save()
         self.url_name = 'return_request'
 
@@ -36,11 +37,11 @@ class UserReturnRequestTestCase(APITestCase):
         '''Test to change status of request to B by the owner account.'''
         response = self.client.put(
             reverse(self.url_name, args=[self.request.id]),
-            data={"status": "B"},
+            data={'status': RETURN_BACK_STATUS},
             format=FORMAT
             )
         self.assertEqual(response.status_code,status.HTTP_200_OK)
-        self.assertEqual(response.data['status'], 'B')
+        self.assertEqual(response.data['status'], RETURN_BACK_STATUS)
 
     def test_request_to_close_by_not_owner(self):
         '''Test to change status of request to B by not the owner account.'''
@@ -55,7 +56,7 @@ class UserReturnRequestTestCase(APITestCase):
 
         response = self.client.put(
             reverse(self.url_name, args=[self.request.id]),
-            data={"status": "B"},
+            data={'status': RETURN_BACK_STATUS},
             format=FORMAT
             )
         self.assertEqual(response.status_code,status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -69,7 +70,7 @@ class UserReturnRequestTestCase(APITestCase):
         self.client.credentials()
         response = self.client.put(
             reverse(self.url_name, args=[self.request.id]),
-            data={"status": "B"},
+            data={"status": RETURN_BACK_STATUS},
             format=FORMAT
             )
         self.assertEqual(response.status_code,status.HTTP_401_UNAUTHORIZED)
@@ -79,7 +80,7 @@ class UserReturnRequestTestCase(APITestCase):
         '''Test to update status of request that doesnot exist.'''
         response = self.client.put(
             reverse(self.url_name, args=[10]),
-            data={"status": "B"},
+            data={"status": RETURN_BACK_STATUS},
             format=FORMAT
             )
         self.assertEqual(response.status_code,status.HTTP_404_NOT_FOUND)
@@ -87,11 +88,11 @@ class UserReturnRequestTestCase(APITestCase):
 
     def test_request_to_close_not_approved(self):
         '''Test to close a request that is not already approved by the librarian.'''
-        self.request.status = 'P'
+        self.request.status = PENDING_STATUS
         self.request.save()
         response = self.client.put(
             reverse(self.url_name, args=[self.request.id]),
-            data={"status": "B"},
+            data={'status': RETURN_BACK_STATUS},
             format=FORMAT
             )
         self.assertEqual(response.status_code,status.HTTP_405_METHOD_NOT_ALLOWED)

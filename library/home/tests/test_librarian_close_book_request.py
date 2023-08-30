@@ -7,9 +7,10 @@ from rest_framework.test import APITestCase
 
 from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
-from home.tests.constants import BATCH_SIZE, FORMAT
 from userapp.tests.constants import USER_PASSWORD
 from home.tests.factories import UserBookRequestFactory
+from home.tests.constants import BATCH_SIZE, FORMAT
+from home.constants import RETURN_BACK_STATUS, CLOSED_STATUS, APPROVED_STATUS
 
 class LibrarianCloseRequestTestCase(APITestCase):
     '''
@@ -28,7 +29,7 @@ class LibrarianCloseRequestTestCase(APITestCase):
         librarian = Permission.objects.get(codename='is_librarian')
         self.librarian_user.user_permissions.add(librarian)
         self.librarian_user.save()
-        self.requests[0].status = 'B'
+        self.requests[0].status = RETURN_BACK_STATUS
         self.requests[0].save()
 
         data = {
@@ -42,18 +43,18 @@ class LibrarianCloseRequestTestCase(APITestCase):
         '''Test to close user request with B status by a librarian user.'''
         response = self.client.put(
             reverse(self.url_name, args=[self.requests[0].id]),
-            data={"status": "C"},
+            data={'status': CLOSED_STATUS},
             format=FORMAT
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['status'], 'C')
+        self.assertEqual(response.data['status'], CLOSED_STATUS)
 
     def test_librarian_unauthorized_close_request(self):
         '''Test to close user request with B status by an anonymous user.'''
         self.client.credentials()
         response = self.client.put(
             reverse(self.url_name, args=[self.requests[0].id]),
-            data={"status": "A"},
+            data={'status': APPROVED_STATUS},
             format=FORMAT
             )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -71,7 +72,7 @@ class LibrarianCloseRequestTestCase(APITestCase):
         '''Test to update the status of a request that doesnot exist.'''
         response = self.client.put(
             reverse(self.url_name, args=[100]),
-            data={"status": "C"},
+            data={'status': CLOSED_STATUS},
             format=FORMAT
             )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -86,7 +87,7 @@ class LibrarianCloseRequestTestCase(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
         response = self.client.put(
             reverse(self.url_name, args=[self.requests[0].id]),
-            data={"status": "A"},
+            data={'status': APPROVED_STATUS},
             format=FORMAT
             )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

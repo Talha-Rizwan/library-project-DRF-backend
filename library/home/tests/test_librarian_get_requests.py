@@ -40,19 +40,19 @@ class LibrarianListRequestTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), BATCH_SIZE)
 
-    # def test_get_all_requests_without_authentication(self):
-    #     '''Test to get all reqests using anonymous user.'''
-    #     self.client.credentials()
-    #     response = self.client.get(self.url, format=FORMAT)
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    def test_get_all_requests_without_authentication(self):
+        '''Test to get all reqests using anonymous user.'''
+        self.client.credentials()
+        response = self.client.get(self.url, format=FORMAT)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    # def test_get_all_requests_with_simple_user(self):
-    #     '''Test to get all user requests using simple user account.'''
-    #     data = {
-    #         "username": self.customer_user.username,
-    #         "password": 'password123'
-    #     }
-    #     token = get_jwt_token(data)['token']['access']
-    #     self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
-    #     response = self.client.get(self.url, format=FORMAT)
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def test_get_all_requests_with_simple_user(self):
+        '''Test to get all user requests using simple user account.'''
+        data = {
+            "username": self.customer_user.username,
+            "password": 'password123'
+        }
+        token = get_jwt_token(data)['token']['access']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        response = self.client.get(self.url, format=FORMAT)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

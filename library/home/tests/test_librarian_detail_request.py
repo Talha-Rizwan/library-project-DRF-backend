@@ -30,7 +30,7 @@ class LibrarianDetailRequestTestCase(APITestCase):
             "username": self.librarian_user.username,
             "password": 'password123'
         }
-        token = get_jwt_token(data)['data']['token']['access']
+        token = get_jwt_token(data)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
     def test_get_request(self):
@@ -66,7 +66,7 @@ class LibrarianDetailRequestTestCase(APITestCase):
             "username": self.customer_user.username,
             "password": 'password123'
         }
-        token = get_jwt_token(data)['data']['token']['access']
+        token = get_jwt_token(data)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
         response = self.client.get(f'{self.url}{self.requests[0].id}/', format=FORMAT)

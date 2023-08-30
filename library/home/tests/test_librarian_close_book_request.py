@@ -33,7 +33,7 @@ class LibrarianCloseRequestTestCase(APITestCase):
             "username": self.librarian_user.username,
             "password": 'password123'
         }
-        token = get_jwt_token(data)['data']['token']['access']
+        token = get_jwt_token(data)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
     def test_librarian_close_request(self):
@@ -80,7 +80,7 @@ class LibrarianCloseRequestTestCase(APITestCase):
             "username": self.customer_user.username,
             "password": 'password123'
         }
-        token = get_jwt_token(data)['data']['token']['access']
+        token = get_jwt_token(data)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
         response = self.client.put(
             f'{self.url}{self.requests[0].id}/',

@@ -23,7 +23,7 @@ class UserRequestTestCase(APITestCase):
             "username": self.customer_user.username,
             "password": 'password123'
         }
-        token = get_jwt_token(data)['data']['token']['access']
+        token = get_jwt_token(data)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
 
@@ -75,7 +75,7 @@ class UserRequestTestCase(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            response.data['data']['books']['requested_books'][0],
+            response.data['books']['requested_books'][0],
             self.request.requested_book.name
             )
 

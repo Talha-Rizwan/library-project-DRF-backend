@@ -26,7 +26,7 @@ class UserReturnRequestTestCase(APITestCase):
             "username": self.customer_user.username,
             "password": 'password123'
         }
-        token = get_jwt_token(data)['data']['token']['access']
+        token = get_jwt_token(data)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
     def test_request_to_close_by_user_owner(self):
@@ -47,7 +47,7 @@ class UserReturnRequestTestCase(APITestCase):
             "username": self.another_customer_user.username,
             "password": 'password123'
         }
-        token = get_jwt_token(data)['data']['token']['access']
+        token = get_jwt_token(data)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
         response = self.client.put(
@@ -58,7 +58,7 @@ class UserReturnRequestTestCase(APITestCase):
         self.assertEqual(response.status_code,status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertEqual(
             response.data['message'],
-            "the user is not authorized or request is currently not approved."
+            "The user is not authorized or the request is currently not approved."
             )
 
     def test_request_to_close_by_anonymous_user(self):
@@ -94,5 +94,5 @@ class UserReturnRequestTestCase(APITestCase):
         self.assertEqual(response.status_code,status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertEqual(
             response.data['message'],
-            "the user is not authorized or request is currently not approved." 
+            "The user is not authorized or the request is currently not approved." 
             )

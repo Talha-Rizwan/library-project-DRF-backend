@@ -31,7 +31,7 @@ class BookViewSetTestCase(APITestCase):
             "username": self.librarian_user.username,
             "password": 'password123'
         }
-        token = get_jwt_token(data)['data']['token']['access']
+        token = get_jwt_token(data)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
     def test_list_books(self):
@@ -65,7 +65,7 @@ class BookViewSetTestCase(APITestCase):
             "username": self.customer_user.username,
             "password": 'password123'
         }
-        token = get_jwt_token(user)['data']['token']['access']
+        token = get_jwt_token(user)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
         serializer = BookSerializer(BookFactory.build())
         data = serializer.data
@@ -124,7 +124,7 @@ class BookViewSetTestCase(APITestCase):
             "username": self.customer_user.username,
             "password": 'password123'
         }
-        token = get_jwt_token(user)['data']['token']['access']
+        token = get_jwt_token(user)['token']['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
         response = self.client.delete(f'{self.url}{self.books[0].id}/')

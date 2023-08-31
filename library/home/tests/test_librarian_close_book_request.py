@@ -9,7 +9,7 @@ from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
 from userapp.tests.constants import USER_PASSWORD
 from home.tests.factories import UserBookRequestFactory
-from home.tests.constants import BATCH_SIZE, FORMAT
+from home.tests.constants import BATCH_SIZE, FORMAT, INCORRECT_STATUS
 from home.constants import RETURN_BACK_STATUS, CLOSED_STATUS, APPROVED_STATUS
 
 class LibrarianCloseRequestTestCase(APITestCase):
@@ -63,7 +63,7 @@ class LibrarianCloseRequestTestCase(APITestCase):
         '''Test to send wrong body data to api using librarian user.'''
         response = self.client.put(
             reverse(self.url_name, args=[self.requests[0].id]),
-            data={"status": "Incorrect"},
+            data={'status': INCORRECT_STATUS},
             format=FORMAT
             )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

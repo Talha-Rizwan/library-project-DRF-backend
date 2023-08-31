@@ -99,4 +99,4 @@ class UserReturnRequestTestCase(APITestCase):
         self.assertEqual(
             response.data['message'],
             "The user is not authorized or the request is currently not approved." 
-            )
+        )

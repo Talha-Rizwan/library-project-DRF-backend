@@ -8,7 +8,7 @@ from rest_framework.test import APITestCase
 from home.serializers import BookSerializer
 from home.tests.factories import BookFactory
 from home.models import Book
-from home.tests.constants import BATCH_SIZE, FORMAT
+from home.tests.constants import BATCH_SIZE, FORMAT, UPDATED_BOOK_NAME, UPDATED_NUMBER_OF_BOOKS
 from userapp.constants import LIBRARIAN_PERMISSION
 from userapp.tests.constants import USER_PASSWORD
 from userapp.tests.factories import UserFactory
@@ -97,8 +97,8 @@ class BookViewSetTestCase(APITestCase):
         '''Test to update a book by a librarian user using put method.'''
         serializer = BookSerializer(self.books[0])
         data = serializer.data
-        data['name'] = "Updated Book Name"
-        data["number_of_books"] = 10
+        data['name'] = UPDATED_BOOK_NAME
+        data["number_of_books"] = UPDATED_NUMBER_OF_BOOKS
         del data['cover_image']
         response = self.client.put(reverse(self.detail_url_name, args=[self.books[0].id]), data=data, format=FORMAT)
         
@@ -111,8 +111,8 @@ class BookViewSetTestCase(APITestCase):
         '''Test tp update a book using id that doesnot exist.'''
         serializer = BookSerializer(self.books[0])
         data = serializer.data
-        data['name'] = "Updated Book Name"
-        data["number_of_books"] = 10
+        data['name'] = UPDATED_BOOK_NAME
+        data["number_of_books"] = UPDATED_NUMBER_OF_BOOKS
         del data['cover_image']
         response = self.client.put(reverse(self.detail_url_name, args=[100]), data=data, format=FORMAT)
         

@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase
 from userapp.tests.factories import UserFactory
 from userapp.serializers import UserSerializer
 from userapp.utlis import get_jwt_token
-from userapp.tests.constants import USER_PASSWORD, FORMAT
+from userapp.tests.constants import USER_PASSWORD, FORMAT, UPDATED_NAME
 
 class UserProfileViewTest(APITestCase):
     '''Class to test the signup and update profile scenarios.'''
@@ -43,8 +43,8 @@ class UserProfileViewTest(APITestCase):
 
     def test_update_user_profile(self):
         '''Test to update user profile by sending an authenticated request.'''
-        update_data = {'full_name': 'talha rizwan'}
+        update_data = {'full_name': UPDATED_NAME}
         response = self.client.put(self.url, data=update_data, format=FORMAT)
         self.user.refresh_from_db()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(self.user.full_name, 'talha rizwan')
+        self.assertEqual(self.user.full_name, UPDATED_NAME)

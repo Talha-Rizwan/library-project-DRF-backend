@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from home.tests.factories import UserBookRequestFactory
-from home.tests.constants import BATCH_SIZE, FORMAT
+from home.tests.constants import BATCH_SIZE, FORMAT, INCORRECT_STATUS
 from home.constants import APPROVED_STATUS, REJECTED_STATUS
 from userapp.tests.constants import USER_PASSWORD
 from userapp.constants import LIBRARIAN_PERMISSION
@@ -123,7 +123,7 @@ class LibrarianDetailRequestTestCase(APITestCase):
         '''Test to send wrong input in the request body.'''
         response = self.client.put(
             reverse(self.url_name, args=[self.requests[0].id]),
-            data={'status': 'Incorrect'},
+            data={'status': INCORRECT_STATUS},
             format=FORMAT
             )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -132,7 +132,7 @@ class LibrarianDetailRequestTestCase(APITestCase):
         '''Test to update a request that doesnot exist.'''
         response = self.client.put(
             reverse(self.url_name, args=[100]),
-            data={"status": REJECTED_STATUS},
+            data={'status': REJECTED_STATUS},
             format=FORMAT
             )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

@@ -33,6 +33,8 @@ class UserLoginProfileViewTest(APITestCase):
         response = self.client.post(self.url, data=data, format=FORMAT)
         self.assertEqual(response.data['message'], 'imvalid credentials')
         self.assertEqual(response.data['data'], {})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
 
     def test_user_invalid_username_login(self):
         '''Test to login a user with invalid username.'''

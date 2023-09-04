@@ -18,3 +18,7 @@ TICKET_STATUS_CHOICES = (
         ('A', 'Approved'),
         ('R', 'Rejected')
     )
+
+LIBRARIAN_EMAIL = 'librarian@gmail.com'
+
+DELAYED_REQUEST_DAYS = 1

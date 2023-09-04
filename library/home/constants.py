@@ -12,3 +12,9 @@ STATUS_CHOICES = (
     (RETURN_BACK_STATUS, 'Back Return'),
     (CLOSED_STATUS, 'Closed')
 )
+
+TICKET_STATUS_CHOICES = (
+        ('P', 'Pending'),
+        ('A', 'Approved'),
+        ('R', 'Rejected')
+    )

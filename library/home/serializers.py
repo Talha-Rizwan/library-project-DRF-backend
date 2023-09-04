@@ -1,7 +1,7 @@
 '''All serializers for home application models'''
 from rest_framework import serializers
 
-from home.models import Book, PendingRequest
+from home.models import Book, PendingRequest, RequestTicket
 from home.constants import APPROVED_STATUS
 # pylint: disable=R0903
 class BookSerializer(serializers.ModelSerializer):
@@ -50,3 +50,10 @@ class UserBookRequestSerializer(serializers.Serializer):
     issued_books = serializers.ListField(child=serializers.CharField())
     requested_books = serializers.ListField(child=serializers.CharField())
     returned_books = serializers.ListField(child=serializers.CharField())
+
+class RequestTicketSerializer(serializers.ModelSerializer):
+    '''User serializer specific for user role functionality'''
+    class Meta:
+        '''The model class associated with this serializer is User and includes certain fields'''
+        model = RequestTicket
+        exclude = ['created']

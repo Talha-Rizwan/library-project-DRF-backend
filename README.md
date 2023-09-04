@@ -149,3 +149,64 @@ Body:
 {
 "status": "C"
 }
+
+
+Extra Functionality APIs:
+
+
+Api : Librarian can see all the delayed book issued requests (with status approved only) (only librarian)
+Url : http://127.0.0.1:8000/api/home/delay-request/
+Method : Get
+
+
+Api : Librarian can get a specific delayed book issued request (with status approved only) (only librarian)
+Url : http://127.0.0.1:8000/api/home/delay-request/11
+Method : Get
+
+
+Api : Librarian can send email to delayed requests users to return book (with status approved only)  (only librarian)
+Url : http://127.0.0.1:8000/api/home/delay-request/11/send_mail/
+Method : Post
+
+
+Api : User can create a ticket if a book is not available and email send to librarian
+Url : http://127.0.0.1:8000/api/home/ticket/
+Method : POST
+Body: 
+{
+"book_name": "silent killer",
+"status": "P"
+}
+
+
+Api : librarian can get all the pending tickets 
+Url : http://127.0.0.1:8000/api/home/ticket/
+Method : GET
+
+
+Api : librarian can get a single pending ticket request
+Url : http://127.0.0.1:8000/api/home/librarian-ticket/3/
+Method : GET
+
+
+Api : librarian can reject the pending ticket by giving a reason which will be sent to the user as email.
+Url : http://127.0.0.1:8000/api/home/librarian-ticket/3/
+Method : Put
+Body: 
+{
+"status": "R",
+"reason": "not good"
+}
+
+
+Api : librarian can approve the pending ticket by creating a new book object and email will be sent to the user.
+Url : http://127.0.0.1:8000/api/home/librarian-ticket/3/
+Method : Put
+Body:  
+{
+"status": "A",
+"book_name": "new book 3",
+"author_name" : "abc",
+"publisher" : "test",
+"number_of_copies": 10
+}

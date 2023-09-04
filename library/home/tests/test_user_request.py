@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from home.tests.factories import UserBookRequestFactory, BookFactory
-from home.tests.constants import FORMAT
+from home.tests.constants import FORMAT, INVALID_ID
 from home.constants import APPROVED_STATUS, PENDING_STATUS
 from userapp.tests.constants import USER_PASSWORD
 from userapp.utlis import get_jwt_token
@@ -46,7 +46,7 @@ class UserRequestTestCase(APITestCase):
     def test_create_request_with_unavailable_book(self):
         '''Test to create a user request for a book that doesnot exist.'''
         data = {
-            "requested_book" : 10
+            "requested_book" : INVALID_ID
         }
 
         response = self.client.post(self.url,data=data, format=FORMAT)

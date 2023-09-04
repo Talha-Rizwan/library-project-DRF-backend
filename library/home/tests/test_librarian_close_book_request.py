@@ -9,7 +9,7 @@ from userapp.tests.factories import UserFactory
 from userapp.utlis import get_jwt_token
 from userapp.tests.constants import USER_PASSWORD
 from home.tests.factories import UserBookRequestFactory
-from home.tests.constants import BATCH_SIZE, FORMAT, INCORRECT_STATUS
+from home.tests.constants import BATCH_SIZE, FORMAT, INCORRECT_STATUS, INVALID_ID
 from home.constants import RETURN_BACK_STATUS, CLOSED_STATUS, APPROVED_STATUS
 
 class LibrarianCloseRequestTestCase(APITestCase):
@@ -71,7 +71,7 @@ class LibrarianCloseRequestTestCase(APITestCase):
     def test_librarain_close_non_existant_request(self):
         '''Test to update the status of a request that doesnot exist.'''
         response = self.client.put(
-            reverse(self.url_name, args=[100]),
+            reverse(self.url_name, args=[INVALID_ID]),
             data={'status': CLOSED_STATUS},
             format=FORMAT
             )

@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from home.tests.factories import UserBookRequestFactory
-from home.tests.constants import FORMAT
+from home.tests.constants import FORMAT, INVALID_ID
 from home.constants import PENDING_STATUS, APPROVED_STATUS, RETURN_BACK_STATUS
 from userapp.tests.constants import USER_PASSWORD
 from userapp.tests.factories import UserFactory
@@ -79,7 +79,7 @@ class UserReturnRequestTestCase(APITestCase):
     def test_request_not_exist(self):
         '''Test to update status of request that doesnot exist.'''
         response = self.client.put(
-            reverse(self.url_name, args=[10]),
+            reverse(self.url_name, args=[INVALID_ID]),
             data={"status": RETURN_BACK_STATUS},
             format=FORMAT
             )

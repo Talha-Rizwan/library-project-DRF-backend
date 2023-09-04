@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from home.tests.factories import UserBookRequestFactory
-from home.tests.constants import BATCH_SIZE, FORMAT, INCORRECT_STATUS
+from home.tests.constants import BATCH_SIZE, FORMAT, INCORRECT_STATUS, INVALID_ID
 from home.constants import APPROVED_STATUS, REJECTED_STATUS
 from userapp.tests.constants import USER_PASSWORD
 from userapp.constants import LIBRARIAN_PERMISSION
@@ -49,7 +49,7 @@ class LibrarianDetailRequestTestCase(APITestCase):
     def test_get_request_with_wrong_id(self):
         '''Test to get request that doesnot exist.'''
         response = self.client.get(
-            reverse(self.url_name, args=[1000]),
+            reverse(self.url_name, args=[INVALID_ID]),
             format=FORMAT
             )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -131,7 +131,7 @@ class LibrarianDetailRequestTestCase(APITestCase):
     def test_librarain_non_existant_request(self):
         '''Test to update a request that doesnot exist.'''
         response = self.client.put(
-            reverse(self.url_name, args=[100]),
+            reverse(self.url_name, args=[INVALID_ID]),
             data={'status': REJECTED_STATUS},
             format=FORMAT
             )

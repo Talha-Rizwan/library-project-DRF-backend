@@ -8,7 +8,8 @@ from rest_framework.test import APITestCase
 from home.serializers import BookSerializer
 from home.tests.factories import BookFactory
 from home.models import Book
-from home.tests.constants import BATCH_SIZE, FORMAT, UPDATED_BOOK_NAME, UPDATED_NUMBER_OF_BOOKS
+from home.tests.constants import BATCH_SIZE, FORMAT, INVALID_ID
+from home.tests.constants import UPDATED_BOOK_NAME, UPDATED_NUMBER_OF_BOOKS
 from userapp.constants import LIBRARIAN_PERMISSION
 from userapp.tests.constants import USER_PASSWORD
 from userapp.tests.factories import UserFactory
@@ -88,7 +89,7 @@ class BookViewSetTestCase(APITestCase):
     def test_retrieve_book_with_invalid_id(self):
         '''Test to get a book with its id that doesnot exist.'''
         self.client.credentials()
-        response = self.client.get(reverse(self.detail_url_name, args=[100]))
+        response = self.client.get(reverse(self.detail_url_name, args=[INVALID_ID]))
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -103,8 +104,8 @@ class BookViewSetTestCase(APITestCase):
         response = self.client.put(reverse(self.detail_url_name, args=[self.books[0].id]), data=data, format=FORMAT)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["name"], 'Updated Book Name')
-        self.assertEqual(response.data['number_of_books'], 10)
+        self.assertEqual(response.data["name"], UPDATED_BOOK_NAME)
+        self.assertEqual(response.data['number_of_books'], UPDATED_NUMBER_OF_BOOKS)
 
 
     def test_update_book_with_invalid_id(self):
@@ -114,7 +115,7 @@ class BookViewSetTestCase(APITestCase):
         data['name'] = UPDATED_BOOK_NAME
         data["number_of_books"] = UPDATED_NUMBER_OF_BOOKS
         del data['cover_image']
-        response = self.client.put(reverse(self.detail_url_name, args=[100]), data=data, format=FORMAT)
+        response = self.client.put(reverse(self.detail_url_name, args=[INVALID_ID]), data=data, format=FORMAT)
         
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 

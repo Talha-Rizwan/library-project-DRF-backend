@@ -40,7 +40,6 @@ class UserProfileView(APIView):
         To update user profile details.
         User must be logged in and can only update their own profile.
         '''
-
         user = request.user
         data = request.data
         data.pop('username', None)

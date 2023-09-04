@@ -2,7 +2,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-from userapp.constants import GENDER_CHOICES
+from userapp.constants import GENDER_CHOICES, LIBRARIAN_PERMISSION
 
 class User(AbstractUser):
     '''
@@ -18,7 +18,7 @@ class User(AbstractUser):
     class Meta:
         '''Available permissions to have different powers in the app.'''
         permissions = [
-            ('is_librarian', 'Is librarian or above')
+            (LIBRARIAN_PERMISSION, 'Is librarian or above')
         ]
 
     def __str__(self):

@@ -22,7 +22,12 @@ class PendingRequest(models.Model):
     request_user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
     requested_book = models.ForeignKey(Book, on_delete=models.CASCADE, blank=True)
     created = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES, null=False, default=PENDING_STATUS)
+    status = models.CharField(
+        max_length=1,
+        choices=STATUS_CHOICES,
+        null=False,
+        default=PENDING_STATUS
+        )
 
     def __str__(self):
         return (f'Request from {self.request_user.full_name} for ' +
@@ -34,7 +39,7 @@ class RequestTicket(models.Model):
     request_user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
     book_name = models.CharField(max_length=50)
     created = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=1, choices=TICKET_STATUS_CHOICES, null=False, default='P')
+    status = models.CharField(max_length=1, choices=TICKET_STATUS_CHOICES, null=False, default=PENDING_STATUS)
     
     def __str__(self):
         return f'Request from {self.request_user.full_name} for {self.book_name} - {self.status}'

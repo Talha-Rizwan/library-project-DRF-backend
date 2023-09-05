@@ -14,9 +14,9 @@ STATUS_CHOICES = (
 )
 
 TICKET_STATUS_CHOICES = (
-        ('P', 'Pending'),
-        ('A', 'Approved'),
-        ('R', 'Rejected')
+        (PENDING_STATUS, 'Pending'),
+        (APPROVED_STATUS, 'Approved'),
+        (REJECTED_STATUS, 'Rejected')
     )
 
 ADMIN_EMAIL = 'admin@gmail.com'

@@ -19,8 +19,4 @@ TICKET_STATUS_CHOICES = (
         (REJECTED_STATUS, 'Rejected')
     )
 
-ADMIN_EMAIL = 'admin@gmail.com'
-
-LIBRARIAN_EMAIL = 'librarian@gmail.com'
-
 DELAYED_REQUEST_DAYS = 1

@@ -7,7 +7,7 @@ from home import views
 
 router = DefaultRouter()
 router.register(r'book-view-set', views.BookViewSet, basename='book',)
-router.register(r'delay-request', views.DelayRequestView, basename='delay-request')
+router.register(r'delay-request', views.LibrarianDelayedBookReturnView, basename='delay-request')
 
 urlpatterns = [
     path('user-request/', views.UserBookRequestView.as_view(), name='pending_request'),

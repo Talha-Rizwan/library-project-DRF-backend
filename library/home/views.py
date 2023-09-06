@@ -205,11 +205,9 @@ class LibrarianDelayedBookReturnView(viewsets.ModelViewSet):
     permission_classes = [IsLibrarianAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    @action(detail=True, methods=['post'])
-    def send_mail(self, request, pk=None):
+    def post(self, request, pk, format=None):
         try:
             pending_request = get_object_or_404(PendingRequest, pk=pk)
-
             subject = 'Delay Notification'
             message = f"Your booking for {pending_request.requested_book.name} book has been delayed."
             from_email = env('ADMIN_EMAIL')
@@ -232,10 +230,11 @@ class UserRequestTicket(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def perform_create(self, serializer):
-        serializer.save(status=PENDING_STATUS, request_user=self.request.user)
-
     def create(self, request, *args, **kwargs):
+        request.data['request_user'] = request.user.id
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
         response = super().create(request, *args, **kwargs)
 
         if response.status_code == status.HTTP_201_CREATED:

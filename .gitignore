@@ -106,6 +106,7 @@ venv/
 ENV/ 
 env.bak/ 
 venv.bak/ 
+library/home/.env
 
 # mkdocs documentation 
 /site 

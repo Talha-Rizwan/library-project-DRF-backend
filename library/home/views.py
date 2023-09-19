@@ -48,10 +48,7 @@ class BookViewSet(viewsets.ModelViewSet):
 
         books = Book.objects.all()
         serializer = BookSerializer(books, many=True)
-        return Response({
-            "message": "No search parameters were provided",
-            "data":serializer.data
-        })
+        return Response(serializer.data)
 
 
 class UserBookRequestView(APIView):

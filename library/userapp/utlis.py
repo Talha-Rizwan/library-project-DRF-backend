@@ -8,7 +8,7 @@ def get_jwt_token(data):
     user = authenticate(username=data['username'], password=data['password'])
 
     if not user:
-        return {'message': 'imvalid credentials', 'data': {}}
+        return {'message': 'invalid credentials', 'data': {}}
     refresh = RefreshToken.for_user(user)
     return {
         'message': 'login success',

@@ -14,6 +14,12 @@ class BookSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'author_name', 'publisher_name', 'number_of_books', 'cover_image']
 
 
+class UserBookSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PendingRequest
+        fields = ['id', 'requested_book', 'created', 'status']
+        depth = 1
+
 class RequestSerializer(serializers.ModelSerializer):
     '''Generic pending request class serializer'''
     class Meta:

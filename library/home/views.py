@@ -15,7 +15,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 import environ
 
-from home.serializers import BookSerializer, RequestSerializer
+from home.serializers import BookSerializer, RequestSerializer, UserBookSerializer
 from home.serializers import UserBookRequestSerializer, RequestTicketSerializer
 from home.models import Book, PendingRequest, RequestTicket
 from userapp.permissions import LibrarianAuthenticatedOrReadOnly, IsLibrarianAuthenticated
@@ -50,7 +50,19 @@ class BookViewSet(viewsets.ModelViewSet):
         serializer = BookSerializer(books, many=True)
         return Response(serializer.data)
 
+class UserBookRequests(viewsets.ModelViewSet):
 
+    queryset = PendingRequest.objects.all()
+    serializer_class = UserBookSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def list(self, request):
+        user = request.user
+        requests = PendingRequest.objects.filter(request_user=user)
+        serializer = UserBookSerializer(requests, many=True)
+        return Response(serializer.data)
+    
 class UserBookRequestView(APIView):
     '''View of requests of the logged in user'''
     permission_classes = [IsAuthenticated]

@@ -16,6 +16,7 @@ urlpatterns = [
     path('request/<int:pk>/', views.BookRequestView.as_view(), name='request_detail'),
     path('request/', views.BookRequestView.as_view(), name='request_list'),
     path('return-request/<int:pk>/', views.UserReturnBookView.as_view(), name='return_request'),
+    path('re-request/<int:pk>/', views.UserRerequestBookView.as_view(), name='re_request'),
     path('close-request/<int:pk>/', views.CloseBookRequest.as_view(), name='close_request'),
     path('ticket/', views.UserRequestTicket.as_view(), name='create-ticket'),
     path('librarian-ticket/<int:pk>/', views.LibrarianTicket.as_view(), name='librarian-ticket')

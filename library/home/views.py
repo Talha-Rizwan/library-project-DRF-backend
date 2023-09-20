@@ -151,8 +151,8 @@ class BookRequestView(
 
 class UserReturnBookView(generics.UpdateAPIView):
     '''
-    User view to initiate a return request.
-    User can only request to return their own request.
+    User view to re-request an already read book.
+    User can only re-request if status is closed.
     '''
     queryset = PendingRequest.objects.all()
     serializer_class = RequestSerializer
@@ -172,6 +172,32 @@ class UserReturnBookView(generics.UpdateAPIView):
 
         return Response(
             {'message': 'The user is not authorized or the request is currently not approved.'},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
+
+class UserRerequestBookView(generics.UpdateAPIView):
+    '''
+    User view to initiate a return request.
+    User can only request to return their own request.
+    '''
+    queryset = PendingRequest.objects.all()
+    serializer_class = RequestSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def update(self, request, pk, format=None):
+        req = self.get_object()
+
+        if req.request_user == request.user and req.status == CLOSED_STATUS:
+            request.data['status'] = PENDING_STATUS
+            serializer = self.get_serializer(req, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+
+            return Response(serializer.data)
+
+        return Response(
+            {'message': 'The user is not authorized or the request is currently not closed.'},
             status=status.HTTP_405_METHOD_NOT_ALLOWED
         )
 

@@ -9,7 +9,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from userapp.serializers import UserLoginSerializer, UserSerializer
 from userapp.utlis import get_jwt_token
-
+from userapp.models import User
 
 class UserProfileView(APIView):
     '''View to create a new or update an existing user profile.'''
@@ -66,6 +66,12 @@ class LoginView(APIView):
         serializer = UserLoginSerializer(data=data)
 
         serializer.is_valid(raise_exception=True)
+        
         response = get_jwt_token(serializer.data)
-
+        response['librarian'] = False
+        newUser = User.objects.get(username=data['username'])
+        user_permissions = newUser.user_permissions.all()
+        for permission in user_permissions:
+            if permission.codename == 'is_librarian':
+                response['librarian'] = True
         return Response(response, status=status.HTTP_200_OK)

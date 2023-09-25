@@ -63,3 +63,10 @@ class RequestTicketSerializer(serializers.ModelSerializer):
         '''The model class associated with this serializer is User and includes certain fields'''
         model = RequestTicket
         exclude = ['created', 'book_name']
+
+class UserRequestTicketSerializer(serializers.ModelSerializer):
+    '''User serializer specific for user role functionality'''
+    class Meta:
+        '''The model class associated with this serializer is User and includes certain fields'''
+        model = RequestTicket
+        exclude = ['created']

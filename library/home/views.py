@@ -256,8 +256,7 @@ class LibrarianDelayedBookReturnView(viewsets.ModelViewSet):
         try:
             pending_request = get_object_or_404(PendingRequest, pk=pk)
             subject = 'Delay Notification'
-            message = f'Your booking for {pending_request.requested_book.name}'
-            + ' book has been delayed.'
+            message = f'Your booking for {pending_request.requested_book.name} book has been delayed.'
             from_email = env('ADMIN_EMAIL')
             recipient_list = [pending_request.request_user.email]
 
@@ -274,7 +273,7 @@ class UserRequestTicket(generics.ListCreateAPIView):
     View to create a pending status ticket to request a new book.
     Librarain can get all the pending tickets
     '''
-    queryset = RequestTicket.objects.filter(status=PENDING_STATUS)
+    queryset = RequestTicket.objects.all()
     serializer_class = RequestTicketSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
@@ -325,8 +324,7 @@ class LibrarianTicket(generics.RetrieveUpdateAPIView):
 
             elif serializer.validated_data['status'] == REJECTED_STATUS:
                 subject = 'Ticket Rejection Notification'
-                message = f"Your request ticket for book {instance.book_name}"
-                + " has been rejected due to reason : {self.request.data['reason']}"
+                message = f"Your request ticket for book {instance.book_name} has been rejected due to reason : {self.request.data['reason']}"
 
             from_email = env('ADMIN_EMAIL')
             recipient_list = [instance.request_user.email]
